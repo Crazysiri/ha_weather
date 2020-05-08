@@ -15,11 +15,14 @@ class WeatherReader():
 		return self._originalJson
 
 
-	def __init__(self,url,parses):
+	def __init__(self,url,parses,identity = None):
 		"""
+		identity 存储时用，如果有这个就用这个拼上url last component存储 否则就用url的md5存
 		parses 是解析的层级 例如和风 需要解析到 ['result']['HeWeather5']
 		"""
 		self._url = url
+
+		self._identity = identity
 
 		self._parses = parses
 
@@ -49,9 +52,13 @@ class WeatherReader():
 			json.dump(jsonData,f)
 
 	def name(self):
-		md5 = hashlib.md5()
-		md5.update(self._url.encode(encoding='utf-8'))
-		name = md5.hexdigest()
+		if self._identity:
+			p,n = os.path.split(self._url)
+			name = self._identity + '_' + n
+		else:
+			md5 = hashlib.md5()
+			md5.update(self._url.encode(encoding='utf-8'))
+			name = md5.hexdigest()
 		path = os.path.dirname(os.path.realpath(__file__)) + '/downloads/' + name + '.json'
 		return name,path
 
@@ -62,4 +69,4 @@ class WeatherReader():
 				self._originalJson = json.load(f)
 		except Exception as e:
 			print('readFromJsonError:')
-			print(e)	
+			print(e)
