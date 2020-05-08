@@ -93,6 +93,7 @@ class Aqi():
 
 	@property
 	def quality(self):
+		#文字描述 良好
 		return self._quality
 
 	@property
@@ -317,7 +318,7 @@ class HeFengWeather():
 		self._city = city
 		self._appkey = appkey
 		url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
-		self._reader = WeatherReader(url,['result','HeWeather5',0])
+		self._reader = WeatherReader(url,None,['result','HeWeather5',0])
 		if self.reader.originalJson:
 			self.parse()
 
