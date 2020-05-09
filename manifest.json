@@ -1,0 +1,10 @@
+{
+  "domain": "ha_weather",
+  "name": "he feng and caiyun",
+  "documentation": "https://github.com/Crazysiri/ha_weather.git",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [
+    "James"
+  ]
+}

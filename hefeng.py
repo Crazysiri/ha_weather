@@ -339,7 +339,7 @@ class HeFengWeather():
 		self._now = Forecast(self.reader.originalJson['now'],False)
 
 
-obj = HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
-# obj.reader.load()
-print(obj.now.condition)
-print(obj.suggestions[0].description)
+# obj = HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
+# # obj.reader.load()
+# print(obj.now.condition)
+# print(obj.suggestions[0].description)
