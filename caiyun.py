@@ -582,18 +582,6 @@ class CaiyunWeather():
 	def weather_url(self):
 		return self.url('weather')
 
-	def realtime_url(self):
-		return self.url('realtime')
-
-	def minutely_url(self):
-		return self.url('minutely')
-
-	def hourly_url(self):
-		return self.url('hourly')
-
-	def daily_url(self):
-		return self.url('daily')
-
 
 
 w = CaiyunWeather('NTWrwDpqyurbROHa','116.39722824','39.90960456')
