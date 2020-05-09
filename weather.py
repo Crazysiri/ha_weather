@@ -40,11 +40,19 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
     # name = config.get(CONF_NAME)
-
+    data = Data()
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
     async_add_devices([HeFengWeather('my weather')], True)
+
+
+class Data(object):
+
+    @asyncio.coroutine
+    def async_update(self, now):
+        """从远程更新信息."""
+        _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
 
 class HeFengWeather(WeatherEntity):
