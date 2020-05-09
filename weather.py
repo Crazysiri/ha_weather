@@ -48,11 +48,27 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     async_add_devices([HeFengWeather('my weather')], True)
 
 
-class Data(object):
+class WeatherData(object):
+
+    @property
+    def hefeng(self):
+        """Return the name of the sensor."""
+        return self._hefeng
+
+    @property
+    def caiyun(self):
+        """Return the name of the sensor."""
+        return self._caiyun
+
+    def __init__(self):
+        self._hefeng = hefeng.HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
+        self._caiyun = caiyun.CaiyunWeather('NTWrwDpqyurbROHa','116.39722824','39.90960456')
 
     @asyncio.coroutine
     def async_update(self, now):
         """从远程更新信息."""
+        self.hefeng.reader.load()
+        self.caiyun.reader.load()
         _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
 
