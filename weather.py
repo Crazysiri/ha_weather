@@ -87,7 +87,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
-        return ''
+        return 'C'
 
     @property
     def humidity(self):
