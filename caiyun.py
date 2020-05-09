@@ -316,7 +316,68 @@ class Hourly():
 			aqiObj.pm25 = pm25
 			self._air_quality.append(aqiObj)
 
-			
+
+class Daily():
+	#空气质量相关
+	@property
+	def temperature(self):
+		"""数组 [{
+			"date": "2020-05-08T00:00+08:00",
+			"max": 17.0,
+			"min": 12.87,
+			"avg": 12.98
+		}]"""
+		return self._temperature
+
+	@property
+	def wind(self):
+		"""数组 [{
+			"date": "2020-05-08T00:00+08:00",
+			"max": {
+				"speed": 11.57,
+				"direction": 88.54
+			},
+			"min": {
+				"speed": 4.93,
+				"direction": 89.31
+			},
+			"avg": {
+				"speed": 8.76,
+				"direction": 99.21
+			}
+		}]"""
+		return self._wind
+
+	@property
+	def humidity(self):
+		"""数组 [{
+			"date": "2020-05-08T00:00+08:00",
+			"max": 0.86,
+			"min": 0.75,
+			"avg": 0.76
+		}]"""
+		return self._humidity
+
+	@property
+	def pressure(self):
+		"""[{
+			"date": "2020-05-08T00:00+08:00",
+			"max": 100601.05,
+			"min": 100441.05,
+			"avg": 100572.11
+		}]"""
+		return self._pressure
+
+
+	def __init__(self,obj):
+		self._obj = obj
+		self.parse(obj)
+	
+	def parse(self,obj):
+		# self._precipitation_2h = obj['precipitation_2h']
+		# self._precipitation = obj['precipitation']
+		self._probability = obj['probability']
+		self._description = obj['description']				
 
 			
 class CaiyunWeather():
