@@ -82,7 +82,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature(self):
         """Return the temperature."""
-        return '20.0'
+        return 20.0
 
     @property
     def temperature_unit(self):
@@ -92,7 +92,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def humidity(self):
         """Return the humidity."""
-        return '60'
+        return 60
 
     @property
     def wind_bearing(self):
@@ -102,12 +102,12 @@ class HeFengWeather(WeatherEntity):
     @property
     def wind_speed(self):
         """Return the wind speed."""
-        return ''
+        return 100
 
     @property
     def pressure(self):
         """Return the pressure."""
-        return '10000'
+        return 10000
 
     @property
     def condition(self):
