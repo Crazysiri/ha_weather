@@ -11,11 +11,53 @@ sys.path.append(path)
 import  UBWeatherReader
 from UBWeatherReader import WeatherReader
 
+CONDITION_CLASSES = {
+    'CLEAR_DAY':'sunny',
+    'CLEAR_NIGHT':'sunny',
+    'PARTLY_CLOUDY_DAY':'partlycloudy',
+    'PARTLY_CLOUDY_NIGHT':'partlycloudy',
+    'CLOUDY':'cloudy',
+    'RAIN':'rainy',
+    'SNOW':'snowy',
+    'WIND':'windy',
+    'FOG':'fog',
+    'HAZE':'fog',
+
+}
+
+SKYCON_TYPE = {
+    'CLEAR_DAY':'晴天',
+    'CLEAR_NIGHT':'晴夜',
+    'PARTLY_CLOUDY_DAY':'多云',
+    'PARTLY_CLOUDY_NIGHT':'多云',
+    'CLOUDY':'阴',
+    'RAIN':'雨',
+    'SNOW':'雪',
+    'WIND':'风',
+    'FOG':'雾',
+    'HAZE':'雾霾',
+}
+
 class Aqi():
+
+	@property
+	def datetime(self):
+		"""hourly里需要"""
+		return self._datetime	
+
 	#空气质量相关
 	@property
 	def aqi(self):
 		return self._aqi
+
+	@property
+	def aqi_usa(self):
+		return self._aqi_usa
+
+	@property
+	def aqi(self):
+		return self._aqi
+
 
 	@property
 	def co(self):
@@ -39,16 +81,24 @@ class Aqi():
 		return self._quality
 
 	@property
+	def quality_usa(self):
+		#文字描述 良好
+		return self._quality_usa
+
+	@property
 	def so2(self):
 		return self._so2
 
-	def __init__(self,obj):
+	def __init__(self,obj=None):
 		self._obj = obj
-		self.parse(obj)
+		if obj:
+			self.parse(obj)
 	
 	def parse(self,obj):
 		# [aqi][usa] [description][usa] 美国标准
 		self._aqi = obj['aqi']['chn']
+		self._aqi_usa = obj['aqi']['usa']
+		self._quality_usa = obj['description']['usa'] 
 		self._co = obj['co']
 		self._o3 = obj['o3']
 		self._pm10 = obj['pm10']
@@ -99,6 +149,7 @@ class Alert():
 		pass	
 
 class Forecast():
+
 	@property
 	def temperature(self):
 		"""温度"""
@@ -107,12 +158,17 @@ class Forecast():
 	@property
 	def humidity(self):
 		"""湿度"""
-		return self._lhumidity	
+		return self._humidity	
 
 	@property
 	def condition(self):
-		"""天气：晴 skycon"""
+		"""天气：sunny skycon"""
 		return self._condition
+
+	@property
+	def txt(self):
+		"""天气：晴"""
+		return self._txt
 
 	@property
 	def wind_speed(self):
@@ -129,28 +185,140 @@ class Forecast():
 		"""气压"""
 		return self._pressure
 
+
+	@property
+	def aqi(self):
+		"""Aqi class"""
+		return self._aqi	
+
+	@property
+	def life_comfort_index(self):
+		"""life_index.comfort.index"""
+		return self._life_comfort_index
+
+	@property
+	def life_comfort_desc(self):
+		"""life_index.comfort.desc"""
+		return self._life_comfort_desc
+
+
+	def __init__(self,obj):
+		self._obj = obj
+		self.parse(obj)
+	
+	def parse(self,obj):
+		# obj = obj['content']
+		self._temperature = obj['temperature']
+		self._humidity = obj['humidity']
+		self._condition = CONDITION_CLASSES[obj['skycon']]
+		self._txt = SKYCON_TYPE[obj['skycon']]
+		self._wind_speed = obj['wind']['speed']
+		self._wind_direction = obj['wind']['direction']
+		self._pressure = obj['pressure']
+		self._aqi = Aqi(obj['air_quality'])
+		self._life_comfort_index = obj['life_index']['comfort']['index']
+		self._life_comfort_desc = obj['life_index']['comfort']['desc']
+
+
+
+class Minutely():
+	#空气质量相关
+	@property
+	def precipitation_2h(self):
+		"""数组 [0,0,0,0]"""
+		return self._precipitation_2h
+
+	@property
+	def precipitation(self):
+		"""数组 [0,0,0,0]"""
+		return self._precipitation
+
+	@property
+	def probability(self):
+		"""数组 [0,0,0,0]"""
+		return self._probability
+
+	@property
+	def description(self):
+		"""未来两小时不会下雨"""
+		return self._description
+
+
+	def __init__(self,obj):
+		self._obj = obj
+		self.parse(obj)
+	
+	def parse(self,obj):
+		# self._precipitation_2h = obj['precipitation_2h']
+		# self._precipitation = obj['precipitation']
+		self._probability = obj['probability']
+		self._description = obj['description']	
+		pass
+
+class Hourly():
+	#空气质量相关
+	@property
+	def temperature(self):
+		"""数组 [{"datetime": "2020-05-08T20:00+08:00","value": 0.0}]"""
+		return self._temperature
+
+	@property
+	def precipitation(self):
+		"""数组 [{"datetime": "2020-05-08T20:00+08:00","value": 0.0}]"""
+		return self._precipitation
+
 	@property
 	def humidity(self):
-		"""湿度"""
-		return self._lhumidity	
+		"""数组 [{"datetime": "2020-05-08T20:00+08:00","value": 0.0}]"""
+		return self._humidity	
 
 	@property
-	def condition(self):
-		"""天气：晴 skycon"""
-		return self._condition
+	def skycon(self):
+		"""数组 [{"datetime": "2020-05-08T20:00+08:00","value": PARTLY_CLOUDY_NIGHT}]"""
+		return self._skycon	
 
 	@property
-	def wind_speed(self):
-		"""风速"""
-		return self._wind_speed
+	def wind(self):
+		"""数组 ["datetime": "2020-05-08T20:00+08:00","speed": 7.56,"direction": 151.0]"""
+		return self._wind
 
 	@property
-	def wind_direction(self):
-		"""风向 360度"""
-		return self._wind_direction	
+	def air_quality(self):
+		"""数组 [Aqi (只有aqi aqi_usa pm25 datetime字段)]"""
+		return self._air_quality
+
+	@property
+	def description(self):
+		"""未来两小时不会下雨"""
+		return self._description
 
 
+	def __init__(self,obj):
+		self._obj = obj
+		self.parse(obj)
+	
+	def parse(self,obj):
+		self._temperature = obj['temperature']
+		self._precipitation = obj['precipitation']
+		self._humidity = obj['humidity']
+		self._skycon = obj['skycon']	
+		self._wind = obj['wind']
+		self._air_quality = []
+		self._description = obj['description']
+		count = len(obj['air_quality']['aqi'])
+		for i in range(0,count):
+			aqi = obj['air_quality']['aqi'][i]
+			pm25 = obj['air_quality']['pm25'][i]['value']
+			aqiObj = Aqi()
+			aqiObj.aqi = aqi['value']['chn']
+			aqiObj.aqi_usa = aqi['value']['usa']
+			aqiObj.datetime = aqi['datetime']
+			aqiObj.pm25 = pm25
+			self._air_quality.append(aqiObj)
 
+			
+
+			
 class CaiyunWeather():
 
 
