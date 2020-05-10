@@ -307,6 +307,32 @@ class Forecast():
 		"""life_index.comfort.desc"""
 		return self._life_comfort_desc
 
+	@property
+	def wind_direction_description(self):
+		try:
+			d = self._wind_direction_description
+		except Exception as e:
+			direction = self.wind_direction
+			if direction > 337.4 or direction < 22.5:
+				final_direction = '北风'
+			elif direction > 22.4 and direction < 67.5:
+				final_direction = '东北风'
+			elif direction > 67.4 and direction < 112.5:
+				final_direction = '东风'
+			elif direction > 112.4 and direction < 157.5:
+				final_direction = '东南风'
+			elif direction > 157.4 and direction < 202.5:
+				final_direction = '南风'
+			elif direction > 202.4 and direction < 247.5:
+				final_direction = '西南风'
+			elif direction > 247.4 and direction < 292.5:
+				final_direction = '西风'
+			elif direction > 292.4 and direction < 337.5:
+				final_direction = '西北风'
+			else:
+				final_direction = '无数据'
+			self._wind_direction_description = final_direction
+		return self._wind_direction_description
 
 
 	@temperature.setter
@@ -563,8 +589,10 @@ class CaiyunWeather():
 		self.parse()
 
 	def parse(self):
-		obj = self._reader.originalJson
-		if not obj:
+		try:
+			obj = self._reader.originalJson
+		except Exception as e:
+			print('no json')
 			return
 
 		self._forecast_keypoint = obj['forecast_keypoint'] 
@@ -586,8 +614,8 @@ class CaiyunWeather():
 
 
 
-# w = CaiyunWeather('NTWrwDpqyurbROHa','116.39722824','39.90960456')
-# # w.weather.load()
+w = CaiyunWeather('NTWrwDpqyurbROHa','116.4381731835','39.8056326262')
+w.load()
 # print(w.hourly.forecasts[0].aqi.pm25)
 # print(w.daily.forecasts[0].date)
 

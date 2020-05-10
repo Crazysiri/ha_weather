@@ -61,8 +61,8 @@ class WeatherData(object):
         return self._caiyun
 
     def __init__(self):
-        self._hefeng = hefeng.HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
-        self._caiyun = caiyun.CaiyunWeather('NTWrwDpqyurbROHa','116.39722824','39.90960456')
+        self._hefeng = hefeng.HeFengWeather('116.4381731835,39.8056326262','372a5a4f972b4d29bcfb0b3570270a')
+        self._caiyun = caiyun.CaiyunWeather('NTWrwDpqyurbRO','116.4381731835','39.8056326262')
 
     @asyncio.coroutine
     def async_update(self, now):
@@ -159,12 +159,16 @@ class HeFengWeather(WeatherEntity):
                 'night': f.skycon_day.txt,
                 })
         return {
+            'description':caiyun.forecast_keypoint,
             'now': {
                 'temperature': caiyun.realtime.temperature,
                 'condition': caiyun.realtime.skycon.txt,
-                'humidity': 60,
+                'humidity': caiyun.realtime.humidity,
                 'aqi': caiyun.realtime.aqi.aqi,
                 'pm25': caiyun.realtime.aqi.pm25,
+                'wind_direction': caiyun.realtime.wind_direction_description,
+                'wind_speed': caiyun.realtime.wind_speed
+
             },
             'hourlys': hourlys,
             'dailys': dailys
