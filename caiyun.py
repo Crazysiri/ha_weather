@@ -544,9 +544,9 @@ class CaiyunWeather():
 		return self._daily
 
 	@property
-	def weather_reader(self):
+	def reader(self):
 		"""Return the attribution."""
-		return self._weather_reader
+		return self._reader
 
 	def setLocation(self,longi,lat):
 		self._longitude = longi
@@ -558,12 +558,12 @@ class CaiyunWeather():
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
 		self.setLocation(longi,lat)
 
-		self._weather_reader = WeatherReader(self.weather_url(),'?alert=true',['result'])
+		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'])
 
 		self.parse()
 
 	def parse(self):
-		obj = self._weather_reader.originalJson
+		obj = self._reader.originalJson
 		if not obj:
 			return
 
@@ -575,6 +575,8 @@ class CaiyunWeather():
 		for content in obj['alert']['content']:
 			self._alerts.append(Alert(content))
 
+	def load(self):
+		self._reader.load()
 
 	def url(self,t):
 		return '%s/%s,%s/%s.json' % (self._base_url,self._longitude,self._latitude,t)
@@ -585,7 +587,7 @@ class CaiyunWeather():
 
 
 # w = CaiyunWeather('NTWrwDpqyurbROHa','116.39722824','39.90960456')
-# # w.weather_reader.load()
+# # w.weather.load()
 # print(w.hourly.forecasts[0].aqi.pm25)
 # print(w.daily.forecasts[0].date)
 

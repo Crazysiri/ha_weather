@@ -41,11 +41,11 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
     # name = config.get(CONF_NAME)
-    data = Data()
+    data = WeatherData()
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
-    async_add_devices([HeFengWeather('my weather')], True)
+    async_add_devices([HeFengWeather('my weather',data)], True)
 
 
 class WeatherData(object):
@@ -67,17 +67,18 @@ class WeatherData(object):
     @asyncio.coroutine
     def async_update(self, now):
         """从远程更新信息."""
-        self.hefeng.reader.load()
-        self.caiyun.reader.load()
+        self.hefeng.load()
+        self.caiyun.load()
         _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
 
 class HeFengWeather(WeatherEntity):
     """Representation of a weather condition."""
 
-    def __init__(self, object_id):
+    def __init__(self, object_id,data):
         """Initialize the  weather."""
         self._object_id = object_id
+        self._data = data
         _LOGGER.debug('__init__')
 
     @property
@@ -98,7 +99,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature(self):
         """Return the temperature."""
-        return 20.0
+        return float(self._data.hefeng.now.temperature)
 
     @property
     def temperature_unit(self):
@@ -138,8 +139,35 @@ class HeFengWeather(WeatherEntity):
     @property
     def device_state_attributes(self):
         """设置其它一些属性值."""
+        caiyun = self._data.caiyun
+        hefeng = self._data.hefeng
+        hourlys = []
+        for f in hefeng.hourly:
+            hourlys.append({
+                'date':f.date,
+                'condition':f.txt,
+                'temperature':f.temperature,
+                'probability':f.probability
+                })
+        dailys = []
+        for f in caiyun.daily.forecasts:
+            dailys.append({
+                'date':f.date,
+                'max': f.forecast_max.temperature,
+                'min': f.forecast_min.temperature,
+                'day': f.skycon_day.txt,
+                'night': f.skycon_day.txt,
+                })
         return {
-            'att': 'custom'
+            'now': {
+                'temperature': caiyun.realtime.temperature,
+                'condition': caiyun.realtime.skycon.txt,
+                'humidity': 60,
+                'aqi': caiyun.realtime.aqi.aqi,
+                'pm25': caiyun.realtime.aqi.pm25,
+            },
+            'hourlys': hourlys,
+            'dailys': dailys
         }
 
 

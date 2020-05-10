@@ -322,6 +322,10 @@ class HeFengWeather():
 		if self.reader.originalJson:
 			self.parse()
 
+	def load(self):
+		self._reader.load()
+		
+
 	def parse(self):
 		obj = self.reader.originalJson['aqi']['city']
 		self._aqi = Aqi(obj)
@@ -330,7 +334,7 @@ class HeFengWeather():
 			self._daily.append(Forecast(item,True))
 		self._hourly = []
 		for item in self.reader.originalJson['hourly_forecast']:
-			self._daily.append(Forecast(item,False))		
+			self._hourly.append(Forecast(item,False))		
 		self._suggestions = []
 		ss = self.reader.originalJson['suggestion']
 		for key in ss:
@@ -341,5 +345,5 @@ class HeFengWeather():
 
 # obj = HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
 # # obj.reader.load()
-# print(obj.now.condition)
+# print(obj.hourly[0])
 # print(obj.suggestions[0].description)
