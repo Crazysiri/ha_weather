@@ -84,6 +84,13 @@ class HeFengWeather(WeatherEntity):
 
     def __init__(self, object_id,data):
         """Initialize the  weather."""
+        self._temperature = None
+        self._humidity = None
+        self._wind_bearing = None
+        self._wind_speed = None
+        self._pressure = None
+        self._condition = None
+
         self._object_id = object_id
         self._data = data
         _LOGGER.debug('__init__')
@@ -106,7 +113,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature(self):
         """Return the temperature."""
-        return 25
+        return self._temperature
 
     @property
     def temperature_unit(self):
@@ -116,27 +123,27 @@ class HeFengWeather(WeatherEntity):
     @property
     def humidity(self):
         """Return the humidity."""
-        return 60
+        return self._humidity
 
     @property
     def wind_bearing(self):
         """Return the wind speed."""
-        return ''
+        return self._wind_bearing
 
     @property
     def wind_speed(self):
         """Return the wind speed."""
-        return 100
+        return self._wind_speed
 
     @property
     def pressure(self):
         """Return the pressure."""
-        return 10000
+        return self._pressure
 
     @property
     def condition(self):
         """Return the weather condition."""
-        return 'unknown'
+        return self._condition
 
     @property
     def attribution(self):
@@ -185,6 +192,14 @@ class HeFengWeather(WeatherEntity):
     @asyncio.coroutine
     def async_update(self):
         """update函数变成了async_update."""
+        caiyun = self._data.caiyun
+        hefeng = self._data.hefeng
+        self._temperature = caiyun.realtime.temperature
+        self._humidity = caiyun.realtime.humidity * 100
+        self._wind_bearing = caiyun.realtime.wind_direction_description
+        self._wind_speed = caiyun.realtime.wind_speed
+        self._pressure = caiyun.realtime.pressure
+        self._condition = caiyun.realtime.skycon.txt
         _LOGGER.debug('async_update')
 
 
