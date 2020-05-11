@@ -33,7 +33,7 @@ class WeatherReader():
 		self.readFromJson()
 
 	def load(self):
-
+		print(self._url+self._params)
 		req = requests.get(self._url + self._params)
 		if req.status_code != 200:
 			print('request error')

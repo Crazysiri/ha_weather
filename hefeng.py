@@ -47,8 +47,8 @@ class Suggestion():
 		return TRANSLATE_SUGGESTION[self._key]
 
 	@property
-	def key(self):
-		return self._key
+	def type(self):
+		return self.__type
 
 	@property
 	def brf(self):
@@ -58,12 +58,12 @@ class Suggestion():
 	def txt(self):
 		return self._txt
 	"""docstring for suggestion"""
-	def __init__(self,key,obj):
-		self._key = key
+	def __init__(self,obj):
 		self._obj = obj
 		self.parse()
 
 	def parse(self):
+		self.__type = self._obj['type'] 
 		self._brf = self._obj['brf']
 		self._txt = self._obj['txt']
 
@@ -236,6 +236,33 @@ class Forecast():
 		""" 风速 """
 		return self._wind_speed
 
+	@property
+	def wind_direction_description(self):
+		try:
+			d = self._wind_direction_description
+		except Exception as e:
+			direction = self.wind_degree
+			if direction > 337.4 or direction < 22.5:
+				final_direction = '北风'
+			elif direction > 22.4 and direction < 67.5:
+				final_direction = '东北风'
+			elif direction > 67.4 and direction < 112.5:
+				final_direction = '东风'
+			elif direction > 112.4 and direction < 157.5:
+				final_direction = '东南风'
+			elif direction > 157.4 and direction < 202.5:
+				final_direction = '南风'
+			elif direction > 202.4 and direction < 247.5:
+				final_direction = '西南风'
+			elif direction > 247.4 and direction < 292.5:
+				final_direction = '西风'
+			elif direction > 292.4 and direction < 337.5:
+				final_direction = '西北风'
+			else:
+				final_direction = '无数据'
+			self._wind_direction_description = final_direction
+		return self._wind_direction_description
+
 	#daily bool值 表示 是否是一天的 因为一天的需要解析 最大值和最小值 而 实时的只需要解析一个温度即可
 	def __init__(self,obj,daily):
 		self._obj = obj
@@ -244,18 +271,22 @@ class Forecast():
 	def parse(self,obj,daily):
 		#for houly or now
 		if not daily:
-			self._code = obj['cond']['code']
-			self._txt = obj['cond']['txt']
+			self._code = obj['cond_code']
+			self._txt = obj['cond_txt']
 			self._temperature = obj['tmp']
 		else:
 		#for daily
-			self._day_code = obj['cond']['code_d']
-			self._night_code = obj['cond']['code_n']
-			self._day_txt = obj['cond']['txt_d']
-			self._night_txt = obj['cond']['txt_n']
-			self._max_temperature = obj['tmp']['max']
-			self._min_temperature = obj['tmp']['min']
+			self._day_code = obj['cond_code_d']
+			self._night_code = obj['cond_code_n']
+			self._day_txt = obj['cond_txt_d']
+			self._night_txt = obj['cond_txt_n']
+			self._max_temperature = obj['tmp_max']
+			self._min_temperature = obj['tmp_min']
 		#for common
+		try:
+			self._date = obj['time'] #hourly字段
+		except Exception as e:
+			pass
 		try:
 			self._date = obj['date']
 		except Exception as e:
@@ -270,11 +301,14 @@ class Forecast():
 		except Exception as e:
 			pass
 		self._pressure = obj['pres']
-		self._wind_degree = obj['wind']['deg']
-		self._wind_direction = obj['wind']['dir']
-		self._wind_level = obj['wind']['sc']
-		self._wind_speed = obj['wind']['spd']
+		self._wind_degree = obj['wind_deg']
+		self._wind_direction = obj['wind_dir']
+		self._wind_level = obj['wind_sc']
+		self._wind_speed = obj['wind_spd']
 
+
+free_base_url = 'https://free-api.heweather.net/s6'
+base_url = 'https://api.heweather.net/s6'
 
 class HeFengWeather():
 
@@ -304,42 +338,91 @@ class HeFengWeather():
 		return self._suggestions
 
 
-	@property
-	def reader(self):
-		"""Return the attribution."""
-		return self._reader
 
 #['result']['HeWeather5']
-	"""docstring for HeFengWeather"""
-	def __init__(self,city,appkey):
-		if not city or not appkey:
-			print('city or appkey must not be null')
+	"""docstring for HeFengWeather free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
+	def __init__(self,location,appkey,free=31):
+		if not location or not appkey:
+			print('location or appkey must not be null')
 			return
-		self._city = city
+		self._free_aqi_city = 'beijing' #默认为beijing 免费api 只能是类似这样的参数
+		self._location = location
 		self._appkey = appkey
-		url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
-		self._reader = WeatherReader(url,None,['result','HeWeather5',0])
-		if self.reader.originalJson:
+		self._free = free
+
+		# url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
+		# self._reader = WeatherReader(url,None,['result','HeWeather6',0])
+		param = '?location=' + self._location + '&key=' + self._appkey
+		self._now_reader = WeatherReader(self.now_url(param),None,['HeWeather6',0])
+		self._forecast_reader = WeatherReader(self.forecast_url(param),None,['HeWeather6',0])
+		self._hourly_reader = WeatherReader(self.hourly_url(param),None,['HeWeather6',0])
+		self._lifestyle_reader = WeatherReader(self.lifestyle_url(param),None,['HeWeather6',0])
+		self._air_reader = WeatherReader(self.air_url(param),None,['HeWeather6',0])
+
+		try:
 			self.parse()
+		except Exception as e:
+			print('parse error')
+			print(e)
+	#如果使用免费api 必须设置这个 否则报错 默认 'beijing'		
+	def set_free_aqi_city(self,city):
+		self._free_aqi_city = city
+		pass
+
+	def now_url(self,param):
+		if self._free & 16 == 16:
+			return free_base_url + '/weather/now' + param
+		else:
+			return base_url + '/weather/now' + param
+
+	def forecast_url(self,param):
+		if self._free & 8 == 8:
+			return free_base_url + '/weather/forecast' + param
+		else:
+			return base_url + '/weather/forecast' + param
+
+	def hourly_url(self,param):
+		if self._free & 4 == 4:
+			return free_base_url + '/weather/hourly' + param
+		else:
+			return base_url + '/weather/hourly' + param
+
+	def lifestyle_url(self,param):
+		if self._free & 2 == 2:
+			return free_base_url + '/weather/lifestyle' + param
+		else:
+			return base_url + '/weather/lifestyle' + param
+
+	def air_url(self,param):
+		if self._free & 1 == 1:
+			print('如果使用免费api 必须设置这个 否则报错 默认 beijing')
+			return free_base_url + '/air/now' + '?location=' + self._free_aqi_city + '&key=' + self._appkey
+		else:
+			return base_url + '/air/now' + param
+
+	def load(self):
+		self._now_reader.load()
+		self._forecast_reader.load()
+		self._hourly_reader.load()
+		self._lifestyle_reader.load()
+		self._air_reader.load()
 
 	def parse(self):
-		obj = self.reader.originalJson['aqi']['city']
+		obj = self._air_reader.originalJson['air_now_city']
 		self._aqi = Aqi(obj)
 		self._daily = []
-		for item in self.reader.originalJson['daily_forecast']:
+		for item in self._forecast_reader.originalJson['daily_forecast']:
 			self._daily.append(Forecast(item,True))
 		self._hourly = []
-		for item in self.reader.originalJson['hourly_forecast']:
-			self._daily.append(Forecast(item,False))		
+		for item in self._hourly_reader.originalJson['hourly']:
+			self._hourly.append(Forecast(item,False))		
 		self._suggestions = []
-		ss = self.reader.originalJson['suggestion']
-		for key in ss:
-			self._suggestions.append(Suggestion(key,ss[key]))
+		for item in self._lifestyle_reader.originalJson['lifestyle']:
+			self._suggestions.append(Suggestion(item))
+		self._now = Forecast(self._now_reader.originalJson['now'],False)
 
-		self._now = Forecast(self.reader.originalJson['now'],False)
-
-
-# obj = HeFengWeather('CN101011100','57f99766cf80f29d6b044fe3ed79845b')
-# # obj.reader.load()
-# print(obj.now.condition)
+# obj = HeFengWeather('CN101011100','')
+# print(obj.suggestions[0].type)
+# obj.load()
+# print(obj.hourly[0])
 # print(obj.suggestions[0].description)

@@ -41,27 +41,44 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
     # name = config.get(CONF_NAME)
-    data = Data()
+    data = WeatherData()
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
-    async_add_devices([HeFengWeather('my weather')], True)
+    async_add_devices([HeFengWeather('my weather',data)], True)
 
 
-class Data(object):
+class WeatherData(object):
+
+    @property
+    def hefeng(self):
+        """Return the name of the sensor."""
+        return self._hefeng
+
+    @property
+    def caiyun(self):
+        """Return the name of the sensor."""
+        return self._caiyun
+
+    def __init__(self):
+        self._hefeng = hefeng.HeFengWeather('116.4381731835,39.8056326262','372a5a4f972b4d29bcfb0b3570270a')
+        self._caiyun = caiyun.CaiyunWeather('NTWrwDpqyurbRO','116.4381731835','39.8056326262')
 
     @asyncio.coroutine
     def async_update(self, now):
         """从远程更新信息."""
+        self.hefeng.load()
+        self.caiyun.load()
         _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
 
 class HeFengWeather(WeatherEntity):
     """Representation of a weather condition."""
 
-    def __init__(self, object_id):
+    def __init__(self, object_id,data):
         """Initialize the  weather."""
         self._object_id = object_id
+        self._data = data
         _LOGGER.debug('__init__')
 
     @property
@@ -82,7 +99,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature(self):
         """Return the temperature."""
-        return 20.0
+        return float(self._data.hefeng.now.temperature)
 
     @property
     def temperature_unit(self):
@@ -122,8 +139,39 @@ class HeFengWeather(WeatherEntity):
     @property
     def device_state_attributes(self):
         """设置其它一些属性值."""
+        caiyun = self._data.caiyun
+        hefeng = self._data.hefeng
+        hourlys = []
+        for f in hefeng.hourly:
+            hourlys.append({
+                'date':f.date,
+                'condition':f.txt,
+                'temperature':f.temperature,
+                'probability':f.probability
+                })
+        dailys = []
+        for f in caiyun.daily.forecasts:
+            dailys.append({
+                'date':f.date,
+                'max': f.forecast_max.temperature,
+                'min': f.forecast_min.temperature,
+                'day': f.skycon_day.txt,
+                'night': f.skycon_day.txt,
+                })
         return {
-            'att': 'custom'
+            'description':caiyun.forecast_keypoint,
+            'now': {
+                'temperature': caiyun.realtime.temperature,
+                'condition': caiyun.realtime.skycon.txt,
+                'humidity': caiyun.realtime.humidity,
+                'aqi': caiyun.realtime.aqi.aqi,
+                'pm25': caiyun.realtime.aqi.pm25,
+                'wind_direction': caiyun.realtime.wind_direction_description,
+                'wind_speed': caiyun.realtime.wind_speed
+
+            },
+            'hourlys': hourlys,
+            'dailys': dailys
         }
 
 
