@@ -99,7 +99,7 @@ class HeFengWeather(WeatherEntity):
     @property
     def temperature(self):
         """Return the temperature."""
-        return float(self._data.hefeng.now.temperature)
+        return 25
 
     @property
     def temperature_unit(self):

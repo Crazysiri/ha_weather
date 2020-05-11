@@ -614,8 +614,8 @@ class CaiyunWeather():
 
 
 
-w = CaiyunWeather('NTWrwDpqyurbROHa','116.4381731835','39.8056326262')
-w.load()
+# w = 
+# w.load()
 # print(w.hourly.forecasts[0].aqi.pm25)
 # print(w.daily.forecasts[0].date)
 
