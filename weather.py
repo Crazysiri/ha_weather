@@ -25,14 +25,18 @@ TIME_BETWEEN_UPDATES = timedelta(seconds=1800)
 
 DEFAULT_TIME = dt_util.now()
 
+CONF_LOCATION = 'location'
+CONF_HEFENG_APPKEY = 'hefengkey'
+CONF_CAIYUN_APPKEY = 'caiyunkey'
 
 ATTRIBUTION = "来自和风天气的天气数据"
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     # vol.Required(CONF_NAME): cv.string,
-    # vol.Required(CONF_CITY): cv.string,
-    # vol.Required(CONF_APPKEY): cv.string,
+    vol.Required(CONF_LOCATION): cv.string,
+    vol.Required(CONF_HEFENG_APPKEY): cv.string,
+    vol.Required(CONF_CAIYUN_APPKEY): cv.string,
 })
 
 
@@ -40,8 +44,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
-    # name = config.get(CONF_NAME)
-    data = WeatherData()
+    location = config.get(CONF_LOCATION)
+    hefengkey = config.get(CONF_HEFENG_APPKEY)
+    caiyunkey = config.get(CONF_CAIYUN_APPKEY)    
+    data = WeatherData(location,hefengkey,caiyunkey)
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
@@ -60,9 +66,10 @@ class WeatherData(object):
         """Return the name of the sensor."""
         return self._caiyun
 
-    def __init__(self):
-        self._hefeng = hefeng.HeFengWeather('116.4381731835,39.8056326262','372a5a4f972b4d29bcfb0b3570270a')
-        self._caiyun = caiyun.CaiyunWeather('NTWrwDpqyurbRO','116.4381731835','39.8056326262')
+    def __init__(self,location,hefengkey,caiyunkey):
+        self._hefeng = hefeng.HeFengWeather(location,hefengkey)
+        comps = location.split(',')
+        self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
 
     @asyncio.coroutine
     def async_update(self, now):
