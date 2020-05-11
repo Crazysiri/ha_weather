@@ -580,6 +580,12 @@ class CaiyunWeather():
 
 
 	def __init__(self,token,longi,lat):
+		self._realtime = None
+		self._minutely = None
+		self._hourly = None
+		self._daily = None
+		self._reader = None
+		self._forecast_keypoint = None
 		self._alerts = []
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
 		self.setLocation(longi,lat)

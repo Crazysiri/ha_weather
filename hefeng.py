@@ -48,7 +48,7 @@ class Suggestion():
 
 	@property
 	def type(self):
-		return self.__type
+		return self._type
 
 	@property
 	def brf(self):
@@ -59,11 +59,14 @@ class Suggestion():
 		return self._txt
 	"""docstring for suggestion"""
 	def __init__(self,obj):
+		self._type = None
+		self._brf = None
+		self._txt = None
 		self._obj = obj
 		self.parse()
 
 	def parse(self):
-		self.__type = self._obj['type'] 
+		self._type = self._obj['type'] 
 		self._brf = self._obj['brf']
 		self._txt = self._obj['txt']
 
@@ -101,6 +104,13 @@ class Aqi():
 		return self._so2
 
 	def __init__(self,obj):
+		self._aqi = None
+		self._co = None
+		self._o3 = None
+		self._pm10 = None
+		self._pm25 = None
+		self._quality = None
+		self._so2 = None
 		self._obj = obj
 		self.parse()
 	
@@ -342,6 +352,12 @@ class HeFengWeather():
 #['result']['HeWeather5']
 	"""docstring for HeFengWeather free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
 	def __init__(self,location,appkey,free=31):
+		self._daily = None
+		self._hourly = None
+		self._now = None
+		self._suggestions = None
+		self._aqi = None
+
 		if not location or not appkey:
 			print('location or appkey must not be null')
 			return
