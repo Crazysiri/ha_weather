@@ -30,12 +30,13 @@ class HAWeatherCard extends Polymer.Element {
             --paper-font-common-expensive-kerning_-_text-rendering
           );
           opacity: var(--dark-primary-opacity);
-          padding: 24px 16px 5px;
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
+          align-content: center;
         }
         .header div {
           display: flex;
+          margin-right: 10px;
         }    
         .container {
           background: var(--main-bg-color);
@@ -47,13 +48,6 @@ class HAWeatherCard extends Polymer.Element {
           padding-top: 50px;
           padding-bottom: 8px;
         }
-        .sub_title {
-          color: var(--main-title-color);
-          font-size: 14px;
-          text-align: center;
-          padding-bottom: 30px;
-        }
-
         .temperature {
           color: var(--main-title-color);
           font-size: 60px;
@@ -89,18 +83,18 @@ class HAWeatherCard extends Polymer.Element {
           background-color: #540822;
         }        
         .attributes {
-          width: 50%;
           cursor: pointer;
           justify-content: space-between;
           align-items: center;
           color: var(--main-title-color);          
           margin: 5px 0px 5px 0px;
+          display: flex;               
         }
         .attributes div{
-          display: flex;
+          width: 30%;  
         }
         .attributes div div{
-          width: 50%;
+          width: 90%;
           margin: 5px 5px 0px 5px;
           align-items: center;
         }        
@@ -128,19 +122,17 @@ class HAWeatherCard extends Polymer.Element {
       <ha-card>
         <div class="container">
           <div style="align-items: baseline;">
+
             <div class="title">北京市朝阳区</div>
             <div class='header'>
               <div style="align-items: center;">
-                [[condition]]
                 <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
+                [[condition]]
               </div>
             </div>
-            <div class="sub_title">pm25:{{pm25}}</div>
             <div class="temperature">{{temperature}}</div>
 
-            <div> {{minutely_description}} <br> {{hourly_description}} </div>
-
-            <div class="attributes">
+            <div class='attributes'>          
               <div on-click="_weatherAttr">
                 <div>
                   <ha-icon icon="hass:water-percent"></ha-icon>&nbsp;[[humidity]] %
@@ -159,6 +151,9 @@ class HAWeatherCard extends Polymer.Element {
               </div>
             </div>
 
+            <div>
+              <div> {{minutely_description}} <br> {{hourly_description}} </div>     
+            </div>
 
             <div class="hourly">
               <template is="dom-repeat" items="{{hourlyList}}">
@@ -181,7 +176,11 @@ class HAWeatherCard extends Polymer.Element {
                   </div>
               </template>            
             </div> 
-
+            <div>
+              <div>
+                pm2.5: [[pm25]]
+              </div>
+            </div>  
           </div>
         </div>
 
