@@ -16,9 +16,27 @@ class HAWeatherCard extends Polymer.Element {
         .card {
           padding: 0 18px 18px 18px;
         }
+        .header {
+          color: var(--main-title-color);          
+          font-family: var(--paper-font-headline_-_font-family);
+          -webkit-font-smoothing: var(
+            --paper-font-headline_-_-webkit-font-smoothing
+          );
+          font-size: 15px;
+          font-weight: var(--paper-font-headline_-_font-weight);
+          letter-spacing: var(--paper-font-headline_-_letter-spacing);
+          line-height: var(--paper-font-headline_-_line-height);
+          text-rendering: var(
+            --paper-font-common-expensive-kerning_-_text-rendering
+          );
+          opacity: var(--dark-primary-opacity);
+          padding: 24px 16px 5px;
+          display: flex;
+          justify-content: space-between;
+        }
         .header div {
           display: flex;
-        }        
+        }    
         .container {
           background: var(--main-bg-color);
         }
@@ -42,6 +60,34 @@ class HAWeatherCard extends Polymer.Element {
           text-align: center;
           padding-bottom: 50px;
         }
+        .aqi,
+        .alarm {
+          font-size: 16px;
+          border-radius: 3px;
+          color: #fff;
+          line-height: 20px;
+          padding: 2px 5px 2px 5px;
+          margin: 0px 0px 0px 10px;
+          height: 20px;
+        }        
+        .aqi_level_0_bg {
+          background-color: #40c057;
+        }
+        .aqi_level_1_bg{
+          background-color: #82c91e;
+        }
+        .aqi_level_2_bg {
+          background-color: #f76707;
+        }
+        .aqi_level_3_bg {
+          background-color: #e03131;
+        }
+        .aqi_level_4_bg {
+          background-color: #841c3c;
+        }
+        .aqi_level_5_bg{
+          background-color: #540822;
+        }        
         .attributes {
           width: 50%;
           cursor: pointer;
@@ -83,7 +129,13 @@ class HAWeatherCard extends Polymer.Element {
         <div class="container">
           <div style="align-items: baseline;">
             <div class="title">北京市朝阳区</div>
-            <div class="sub_title"> aqi:{{aqi}} pm25:{{pm25}} {{condition}}</div>
+            <div class='header'>
+              <div style="align-items: center;">
+                [[condition]]
+                <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
+              </div>
+            </div>
+            <div class="sub_title">pm25:{{pm25}}</div>
             <div class="temperature">{{temperature}}</div>
 
             <div> {{minutely_description}} <br> {{hourly_description}} </div>
@@ -203,7 +255,11 @@ class HAWeatherCard extends Polymer.Element {
   getWindDirIcon(degree) {
     return this.cardinalDirectionsIcon[parseInt((degree + 22.5) / 45.0)];
   }
-  
+
+  aqiLevel(aqi) {
+    return 'aqi_level_'+parseInt(aqi / 50.0)+'_bg';
+  }  
+
   _fire(type, detail, options) {
     const node = this.shadowRoot;
     options = options || {};
