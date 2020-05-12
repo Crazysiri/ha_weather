@@ -319,11 +319,12 @@ class Forecast():
 
 free_base_url = 'https://free-api.heweather.net/s6'
 base_url = 'https://api.heweather.net/s6'
-now_free = 1 << 4
-forcast_free = 1 << 3
-hourly_free = 1 << 2
-lifestyle_free = 1 << 1
-air_free = 1
+HEFENG_NOW_IS_FREE = 1 << 4
+HEFENG_FORECAST_IS_FREE = 1 << 3
+HEFENG_HOURLY_IS_FREE = 1 << 2
+HEFENG_LIFESTYLE_IS_FREE = 1 << 1
+HEFENG_AIR_IS_FREE = 1
+
 class HeFengWeather():
 
 #每日数据
@@ -354,8 +355,10 @@ class HeFengWeather():
 
 
 #['result']['HeWeather5']
-	"""docstring for HeFengWeather free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
-	def __init__(self,location,appkey,freeappkey,free=now_free|forcast_free|air_free|lifestyle_free):
+	"""docstring for HeFengWeather 
+	 save_name_pre ： 定制化存储的名字，例如a 地点的是home b地点的是office
+	 free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
+	def __init__(self,location,appkey,freeappkey,save_name_pre='home',free=HEFENG_NOW_IS_FREE|HEFENG_FORECAST_IS_FREE|HEFENG_HOURLY_IS_FREE|HEFENG_AIR_IS_FREE|HEFENG_LIFESTYLE_IS_FREE):
 		self._daily = None
 		self._hourly = None
 		self._now = None
@@ -372,11 +375,11 @@ class HeFengWeather():
 
 		# url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
 		# self._reader = WeatherReader(url,None,['result','HeWeather6',0])
-		self._now_reader = WeatherReader(self.now_url(),None,['HeWeather6',0],'hefeng_now')
-		self._forecast_reader = WeatherReader(self.forecast_url(),None,['HeWeather6',0],'hefeng_daily')
-		self._hourly_reader = WeatherReader(self.hourly_url(),None,['HeWeather6',0],'hefeng_hourly')
-		self._lifestyle_reader = WeatherReader(self.lifestyle_url(),None,['HeWeather6',0],'hefeng_lifestyle')
-		self._air_reader = WeatherReader(self.air_url(),None,['HeWeather6',0],'hefeng_air')
+		self._now_reader = WeatherReader(self.now_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_now')
+		self._forecast_reader = WeatherReader(self.forecast_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_daily')
+		self._hourly_reader = WeatherReader(self.hourly_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_hourly')
+		self._lifestyle_reader = WeatherReader(self.lifestyle_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_lifestyle')
+		self._air_reader = WeatherReader(self.air_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_air')
 		self.parse()
 
 	#如果使用免费api 必须设置这个 否则报错 默认 'beijing'		
@@ -385,31 +388,31 @@ class HeFengWeather():
 		pass
 
 	def now_url(self):
-		if self._free & now_free:
+		if self._free & HEFENG_NOW_IS_FREE:
 			return free_base_url + '/weather/now' + '?location=' + self._location + '&key=' + self._freeappkey
 		else:
 			return base_url + '/weather/now' +  '?location=' + self._location + '&key=' + self._appkey
 
 	def forecast_url(self):
-		if self._free & forcast_free:
+		if self._free & HEFENG_FORECAST_IS_FREE:
 			return free_base_url + '/weather/forecast' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
 			return base_url + '/weather/forecast' +  '?location=' + self._location + '&key=' + self._appkey
 
 	def hourly_url(self):
-		if self._free & hourly_free:
+		if self._free & HEFENG_HOURLY_IS_FREE:
 			return free_base_url + '/weather/hourly' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
 			return base_url + '/weather/hourly' +  '?location=' + self._location + '&key=' + self._appkey
 
 	def lifestyle_url(self):
-		if self._free & lifestyle_free:
+		if self._free & HEFENG_LIFESTYLE_IS_FREE:
 			return free_base_url + '/weather/lifestyle' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
 			return base_url + '/weather/lifestyle' +  '?location=' + self._location + '&key=' + self._appkey
 
 	def air_url(self):
-		if self._free & air_free:
+		if self._free & HEFENG_AIR_IS_FREE:
 			print('如果使用免费api 必须设置这个 否则报错 默认 beijing')
 			return free_base_url + '/air/now' + '?location=' + self._free_aqi_city + '&key=' + self._freeappkey
 		else:

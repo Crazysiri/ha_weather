@@ -30,15 +30,28 @@ CONF_HEFENG_APPKEY = 'hefengkey'
 CONF_HEFENG_FREE_APPKEY = 'hefengfreekey'
 CONF_CAIYUN_APPKEY = 'caiyunkey'
 
+#一共五个api 分别控制是否是免费
+CONF_HEFENG_NOW_IS_FREE = 'free_now'
+CONF_HEFENG_DAILY_IS_FREE = 'free_daily'
+CONF_HEFENG_HOURLY_IS_FREE = 'free_hourly'
+CONF_HEFENG_AIR_IS_FREE = 'free_air'
+CONF_HEFENG_LIFESTYLE_IS_FREE = 'free_lifestyle'
+
 ATTRIBUTION = "来自和风天气的天气数据"
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     # vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_LOCATION): cv.string,
-    vol.Required(CONF_HEFENG_APPKEY): cv.string,
+    vol.Optional(CONF_HEFENG_APPKEY,default=''): cv.string,
     vol.Required(CONF_HEFENG_FREE_APPKEY): cv.string,  
     vol.Required(CONF_CAIYUN_APPKEY): cv.string,
+    vol.Optional(CONF_HEFENG_NOW_IS_FREE,default=True): cv.boolean,
+    vol.Optional(CONF_HEFENG_DAILY_IS_FREE,default=True): cv.boolean,
+    vol.Optional(CONF_HEFENG_HOURLY_IS_FREE,default=True): cv.boolean,
+    vol.Optional(CONF_HEFENG_AIR_IS_FREE,default=True): cv.boolean,
+    vol.Optional(CONF_HEFENG_LIFESTYLE_IS_FREE,default=True): cv.boolean,
+
 })
 
 
@@ -49,8 +62,23 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     location = config.get(CONF_LOCATION)
     hefengkey = config.get(CONF_HEFENG_APPKEY)
     hefengfreekey = config.get(CONF_HEFENG_FREE_APPKEY)
-    caiyunkey = config.get(CONF_CAIYUN_APPKEY)    
-    data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey)
+    caiyunkey = config.get(CONF_CAIYUN_APPKEY)
+
+    #这里是确定哪些是免费哪些是收费api，默认都是免费即下面的位运算的值都需要 或运算，相关相当于二进制：11111    
+    free = 0
+    if config.get(CONF_HEFENG_NOW_IS_FREE):
+        free = free | hefeng.HEFENG_NOW_IS_FREE
+    if config.get(CONF_HEFENG_DAILY_IS_FREE):
+        free = free | hefeng.HEFENG_FORECAST_IS_FREE
+    if config.get(CONF_HEFENG_HOURLY_IS_FREE):
+        free = free | hefeng.HEFENG_HOURLY_IS_FREE      
+    if config.get(CONF_HEFENG_AIR_IS_FREE):
+        free = free | hefeng.HEFENG_AIR_IS_FREE       
+    if config.get(CONF_HEFENG_LIFESTYLE_IS_FREE):
+        free = free | hefeng.HEFENG_LIFESTYLE_IS_FREE
+
+
+    data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,free)
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
@@ -69,8 +97,10 @@ class WeatherData(object):
         """Return the name of the sensor."""
         return self._caiyun
 
-    def __init__(self,location,hefengkey,hefengfreekey,caiyunkey):
-        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey)
+    def __init__(self,location,hefengkey,hefengfreekey,caiyunkey,free):
+        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)
+        _LOGGER.info("free")
+        _LOGGER.info(self._hefeng._free)       
         comps = location.split(',')
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
 

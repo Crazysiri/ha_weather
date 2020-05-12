@@ -583,7 +583,7 @@ class CaiyunWeather():
 		self._latitude = lat
 
 
-	def __init__(self,token,longi,lat):
+	def __init__(self,token,longi,lat,save_name_pre='home'):
 		self._realtime = None
 		self._minutely = None
 		self._hourly = None
@@ -594,7 +594,7 @@ class CaiyunWeather():
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
 		self.setLocation(longi,lat)
 
-		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'],'caiyun_weather')
+		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'],save_name_pre + '_caiyun_weather')
 
 		self.parse()
 
