@@ -15,16 +15,18 @@ class WeatherReader():
 		return self._originalJson
 
 
-	def __init__(self,url,params,parses,identity = None):
+	def __init__(self,url,params,parses,savename = None):
 		"""
-		identity 存储时用，如果有这个就用这个拼上url last component存储 否则就用url的md5存
+		savename 存储时用，如果有name 就不md5随机值了
 		parses 是解析的层级 例如和风 需要解析到 ['result']['HeWeather5']
 		"""
 		self._url = url
 
-		self._identity = identity
+		self._savename = savename
 
 		self._parses = parses
+
+		self._originalJson = None
 
 		if params == None:
 			params = ''
@@ -55,9 +57,8 @@ class WeatherReader():
 			json.dump(jsonData,f)
 
 	def name(self):
-		if self._identity:
-			p,n = os.path.split(self._url)
-			name = self._identity + '_' + n
+		if self._savename:
+			name = self._savename
 		else:
 			md5 = hashlib.md5()
 			md5.update(self._url.encode(encoding='utf-8'))

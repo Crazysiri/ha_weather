@@ -594,24 +594,20 @@ class CaiyunWeather():
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
 		self.setLocation(longi,lat)
 
-		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'])
+		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'],'caiyun_weather')
 
 		self.parse()
 
 	def parse(self):
-		try:
-			obj = self._reader.originalJson
-		except Exception as e:
-			print('no json')
-			return
-
-		self._forecast_keypoint = obj['forecast_keypoint'] 
-		self._realtime = Forecast(obj['realtime'])
-		self._minutely = Minutely(obj['minutely'])
-		self._hourly = Hourly(obj['hourly'])
-		self._daily = Daily(obj['daily'])
-		for content in obj['alert']['content']:
-			self._alerts.append(Alert(content))
+		obj = self._reader.originalJson
+		if obj:
+			self._forecast_keypoint = obj['forecast_keypoint'] 
+			self._realtime = Forecast(obj['realtime'])
+			self._minutely = Minutely(obj['minutely'])
+			self._hourly = Hourly(obj['hourly'])
+			self._daily = Daily(obj['daily'])
+			for content in obj['alert']['content']:
+				self._alerts.append(Alert(content))
 
 	def load(self):
 		self._reader.load()

@@ -27,6 +27,7 @@ DEFAULT_TIME = dt_util.now()
 
 CONF_LOCATION = 'location'
 CONF_HEFENG_APPKEY = 'hefengkey'
+CONF_HEFENG_FREE_APPKEY = 'hefengfreekey'
 CONF_CAIYUN_APPKEY = 'caiyunkey'
 
 ATTRIBUTION = "来自和风天气的天气数据"
@@ -36,6 +37,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     # vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_LOCATION): cv.string,
     vol.Required(CONF_HEFENG_APPKEY): cv.string,
+    vol.Required(CONF_HEFENG_FREE_APPKEY): cv.string,  
     vol.Required(CONF_CAIYUN_APPKEY): cv.string,
 })
 
@@ -46,8 +48,9 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     _LOGGER.info("setup platform weather.Heweather...")
     location = config.get(CONF_LOCATION)
     hefengkey = config.get(CONF_HEFENG_APPKEY)
+    hefengfreekey = config.get(CONF_HEFENG_FREE_APPKEY)
     caiyunkey = config.get(CONF_CAIYUN_APPKEY)    
-    data = WeatherData(location,hefengkey,caiyunkey)
+    data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey)
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
@@ -66,8 +69,8 @@ class WeatherData(object):
         """Return the name of the sensor."""
         return self._caiyun
 
-    def __init__(self,location,hefengkey,caiyunkey):
-        self._hefeng = hefeng.HeFengWeather(location,hefengkey)
+    def __init__(self,location,hefengkey,hefengfreekey,caiyunkey):
+        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey)
         comps = location.split(',')
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
 
@@ -156,22 +159,24 @@ class HeFengWeather(WeatherEntity):
         caiyun = self._data.caiyun
         hefeng = self._data.hefeng
         hourlys = []
-        for f in hefeng.hourly:
-            hourlys.append({
-                'date':f.date,
-                'condition':f.txt,
-                'temperature':f.temperature,
-                'probability':f.probability
-                })
+        if hefeng.hourly:
+            for f in hefeng.hourly:
+                hourlys.append({
+                    'date':f.date,
+                    'condition':f.txt,
+                    'temperature':f.temperature,
+                    'probability':f.probability
+                    })
         dailys = []
-        for f in caiyun.daily.forecasts:
-            dailys.append({
-                'date':f.date,
-                'max': f.forecast_max.temperature,
-                'min': f.forecast_min.temperature,
-                'day': f.skycon_day.txt,
-                'night': f.skycon_day.txt,
-                })
+        if caiyun.daily.forecasts:
+            for f in caiyun.daily.forecasts:
+                dailys.append({
+                    'date':f.date,
+                    'max': f.forecast_max.temperature,
+                    'min': f.forecast_min.temperature,
+                    'day': f.skycon_day.txt,
+                    'night': f.skycon_day.txt,
+                    })
         return {
             'description':caiyun.forecast_keypoint,
             'minutely_description':caiyun.minutely.description,
@@ -197,13 +202,14 @@ class HeFengWeather(WeatherEntity):
     def async_update(self):
         """update函数变成了async_update."""
         caiyun = self._data.caiyun
-        hefeng = self._data.hefeng
-        self._temperature = caiyun.realtime.temperature
-        self._humidity = caiyun.realtime.humidity * 100
-        self._wind_bearing = caiyun.realtime.wind_direction_description
-        self._wind_speed = caiyun.realtime.wind_speed
-        self._pressure = caiyun.realtime.pressure / 100
-        self._condition = caiyun.realtime.skycon.txt
+        realtime = caiyun.realtime
+        if realtime:
+            self._temperature = realtime.temperature
+            self._humidity = realtime.humidity * 100
+            self._wind_bearing = realtime.wind_direction_description
+            self._wind_speed = realtime.wind_speed
+            self._pressure = realtime.pressure / 100
+            self._condition = realtime.skycon.txt
         _LOGGER.debug('async_update')
 
 

@@ -279,7 +279,7 @@ class Forecast():
 		self.parse(obj,daily)
 
 	def parse(self,obj,daily):
-		#for houly or now
+		#for hourly or now
 		if not daily:
 			self._code = obj['cond_code']
 			self._txt = obj['cond_txt']
@@ -355,96 +355,94 @@ class HeFengWeather():
 
 #['result']['HeWeather5']
 	"""docstring for HeFengWeather free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
-	def __init__(self,location,appkey,free=now_free&forcast_free&lifestyle_free&air_free):
+	def __init__(self,location,appkey,freeappkey,free=now_free|forcast_free|air_free|lifestyle_free):
 		self._daily = None
 		self._hourly = None
 		self._now = None
 		self._suggestions = None
 		self._aqi = None
-
 		if not location or not appkey:
 			print('location or appkey must not be null')
 			return
 		self._free_aqi_city = 'beijing' #默认为beijing 免费api 只能是类似这样的参数
 		self._location = location
 		self._appkey = appkey
+		self._freeappkey = freeappkey
 		self._free = free
 
 		# url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
 		# self._reader = WeatherReader(url,None,['result','HeWeather6',0])
-		param = '?location=' + self._location + '&key=' + self._appkey
-		self._now_reader = WeatherReader(self.now_url(param),None,['HeWeather6',0])
-		self._forecast_reader = WeatherReader(self.forecast_url(param),None,['HeWeather6',0])
-		self._hourly_reader = WeatherReader(self.hourly_url(param),None,['HeWeather6',0])
-		self._lifestyle_reader = WeatherReader(self.lifestyle_url(param),None,['HeWeather6',0])
-		self._air_reader = WeatherReader(self.air_url(param),None,['HeWeather6',0])
+		self._now_reader = WeatherReader(self.now_url(),None,['HeWeather6',0],'hefeng_now')
+		self._forecast_reader = WeatherReader(self.forecast_url(),None,['HeWeather6',0],'hefeng_daily')
+		self._hourly_reader = WeatherReader(self.hourly_url(),None,['HeWeather6',0],'hefeng_hourly')
+		self._lifestyle_reader = WeatherReader(self.lifestyle_url(),None,['HeWeather6',0],'hefeng_lifestyle')
+		self._air_reader = WeatherReader(self.air_url(),None,['HeWeather6',0],'hefeng_air')
+		self.parse()
 
-		try:
-			self.parse()
-		except Exception as e:
-			print('parse error')
-			print(e)
 	#如果使用免费api 必须设置这个 否则报错 默认 'beijing'		
 	def set_free_aqi_city(self,city):
 		self._free_aqi_city = city
 		pass
 
-	def now_url(self,param):
-		if self._free & now_free == now_free:
-			return free_base_url + '/weather/now' + param
+	def now_url(self):
+		if self._free & now_free:
+			return free_base_url + '/weather/now' + '?location=' + self._location + '&key=' + self._freeappkey
 		else:
-			return base_url + '/weather/now' + param
+			return base_url + '/weather/now' +  '?location=' + self._location + '&key=' + self._appkey
 
-	def forecast_url(self,param):
-		if self._free & forcast_free == forcast_free:
-			return free_base_url + '/weather/forecast' + param
+	def forecast_url(self):
+		if self._free & forcast_free:
+			return free_base_url + '/weather/forecast' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
-			return base_url + '/weather/forecast' + param
+			return base_url + '/weather/forecast' +  '?location=' + self._location + '&key=' + self._appkey
 
-	def hourly_url(self,param):
-		if self._free & hourly_free == hourly_free:
-			return free_base_url + '/weather/hourly' + param
+	def hourly_url(self):
+		if self._free & hourly_free:
+			return free_base_url + '/weather/hourly' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
-			return base_url + '/weather/hourly' + param
+			return base_url + '/weather/hourly' +  '?location=' + self._location + '&key=' + self._appkey
 
-	def lifestyle_url(self,param):
-		if self._free & lifestyle_free == lifestyle_free:
-			return free_base_url + '/weather/lifestyle' + param
+	def lifestyle_url(self):
+		if self._free & lifestyle_free:
+			return free_base_url + '/weather/lifestyle' +  '?location=' + self._location + '&key=' + self._freeappkey
 		else:
-			return base_url + '/weather/lifestyle' + param
+			return base_url + '/weather/lifestyle' +  '?location=' + self._location + '&key=' + self._appkey
 
-	def air_url(self,param):
-		if self._free & air_free == air_free:
+	def air_url(self):
+		if self._free & air_free:
 			print('如果使用免费api 必须设置这个 否则报错 默认 beijing')
-			return free_base_url + '/air/now' + '?location=' + self._free_aqi_city + '&key=' + self._appkey
+			return free_base_url + '/air/now' + '?location=' + self._free_aqi_city + '&key=' + self._freeappkey
 		else:
-			return base_url + '/air/now' + param
+			return base_url + '/air/now' +  '?location=' + self._location + '&key=' + self._appkey
 
 	def load(self):
 		self._now_reader.load()
 		self._forecast_reader.load()
-		self._hourly_reader.load()
+		# self._hourly_reader.load()
 		self._lifestyle_reader.load()
 		self._air_reader.load()
 
 	def parse(self):
-		obj = self._air_reader.originalJson['air_now_city']
-		self._aqi = Aqi(obj)
-		self._daily = []
-		for item in self._forecast_reader.originalJson['daily_forecast']:
-			self._daily.append(Forecast(item,True))
-		self._hourly = []
-		for item in self._hourly_reader.originalJson['hourly']:
-			self._hourly.append(Forecast(item,False))		
-		self._suggestions = []
-		for item in self._lifestyle_reader.originalJson['lifestyle']:
-			self._suggestions.append(Suggestion(item))
-		self._now = Forecast(self._now_reader.originalJson['now'],False)
+		if self._air_reader.originalJson:
+			obj = self._air_reader.originalJson['air_now_city']
+			self._aqi = Aqi(obj)
+		if self._forecast_reader.originalJson:
+			self._daily = []
+			for item in self._forecast_reader.originalJson['daily_forecast']:
+				self._daily.append(Forecast(item,True))
+		if self._hourly_reader.originalJson:
+			self._hourly = []
+			for item in self._hourly_reader.originalJson['hourly']:
+				self._hourly.append(Forecast(item,False))	
+		if self._lifestyle_reader.originalJson:
+			self._suggestions = []
+			for item in self._lifestyle_reader.originalJson['lifestyle']:
+				self._suggestions.append(Suggestion(item))
+		if self._now_reader.originalJson:
+			self._now = Forecast(self._now_reader.originalJson['now'],False)
 
-print(now_free&forcast_free&air_free&hourly_free&forcast_free)
 
-# obj = HeFengWeather('CN101011100','')
-# print(obj.suggestions[0].type)
+# print(obj.hourly[0].temperature)
 # obj.load()
 # print(obj.hourly[0])
 # print(obj.suggestions[0].description)
