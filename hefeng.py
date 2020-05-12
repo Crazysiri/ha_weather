@@ -319,7 +319,11 @@ class Forecast():
 
 free_base_url = 'https://free-api.heweather.net/s6'
 base_url = 'https://api.heweather.net/s6'
-
+now_free = 1 << 4
+forcast_free = 1 << 3
+hourly_free = 1 << 2
+lifestyle_free = 1 << 1
+air_free = 1
 class HeFengWeather():
 
 #每日数据
@@ -351,7 +355,7 @@ class HeFengWeather():
 
 #['result']['HeWeather5']
 	"""docstring for HeFengWeather free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
-	def __init__(self,location,appkey,free=31):
+	def __init__(self,location,appkey,free=now_free&forcast_free&lifestyle_free&air_free):
 		self._daily = None
 		self._hourly = None
 		self._now = None
@@ -386,31 +390,31 @@ class HeFengWeather():
 		pass
 
 	def now_url(self,param):
-		if self._free & 16 == 16:
+		if self._free & now_free == now_free:
 			return free_base_url + '/weather/now' + param
 		else:
 			return base_url + '/weather/now' + param
 
 	def forecast_url(self,param):
-		if self._free & 8 == 8:
+		if self._free & forcast_free == forcast_free:
 			return free_base_url + '/weather/forecast' + param
 		else:
 			return base_url + '/weather/forecast' + param
 
 	def hourly_url(self,param):
-		if self._free & 4 == 4:
+		if self._free & hourly_free == hourly_free:
 			return free_base_url + '/weather/hourly' + param
 		else:
 			return base_url + '/weather/hourly' + param
 
 	def lifestyle_url(self,param):
-		if self._free & 2 == 2:
+		if self._free & lifestyle_free == lifestyle_free:
 			return free_base_url + '/weather/lifestyle' + param
 		else:
 			return base_url + '/weather/lifestyle' + param
 
 	def air_url(self,param):
-		if self._free & 1 == 1:
+		if self._free & air_free == air_free:
 			print('如果使用免费api 必须设置这个 否则报错 默认 beijing')
 			return free_base_url + '/air/now' + '?location=' + self._free_aqi_city + '&key=' + self._appkey
 		else:
@@ -436,6 +440,8 @@ class HeFengWeather():
 		for item in self._lifestyle_reader.originalJson['lifestyle']:
 			self._suggestions.append(Suggestion(item))
 		self._now = Forecast(self._now_reader.originalJson['now'],False)
+
+print(now_free&forcast_free&air_free&hourly_free&forcast_free)
 
 # obj = HeFengWeather('CN101011100','')
 # print(obj.suggestions[0].type)

@@ -174,14 +174,18 @@ class HeFengWeather(WeatherEntity):
                 })
         return {
             'description':caiyun.forecast_keypoint,
+            'minutely_description':caiyun.minutely.description,
+            'hourly_description':caiyun.hourly.description,
             'now': {
                 'temperature': caiyun.realtime.temperature,
                 'condition': caiyun.realtime.skycon.txt,
-                'humidity': caiyun.realtime.humidity,
+                'humidity': caiyun.realtime.humidity * 100,
                 'aqi': caiyun.realtime.aqi.aqi,
                 'pm25': caiyun.realtime.aqi.pm25,
                 'wind_direction': caiyun.realtime.wind_direction_description,
-                'wind_speed': caiyun.realtime.wind_speed
+                'wind_degree': caiyun.realtime.wind_direction,
+                'wind_speed': caiyun.realtime.wind_speed,
+                'pressure': caiyun.realtime.pressure / 100
 
             },
             'hourlys': hourlys,
@@ -198,7 +202,7 @@ class HeFengWeather(WeatherEntity):
         self._humidity = caiyun.realtime.humidity * 100
         self._wind_bearing = caiyun.realtime.wind_direction_description
         self._wind_speed = caiyun.realtime.wind_speed
-        self._pressure = caiyun.realtime.pressure
+        self._pressure = caiyun.realtime.pressure / 100
         self._condition = caiyun.realtime.skycon.txt
         _LOGGER.debug('async_update')
 

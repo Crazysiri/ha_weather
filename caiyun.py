@@ -23,6 +23,7 @@ CONDITION_CLASSES = {
     'WIND':'windy',
     'FOG':'fog',
     'HAZE':'fog',
+    'DUST':'fog',
 
 }
 
@@ -38,6 +39,7 @@ SKYCON_TYPE = {
     'WIND':'风',
     'FOG':'雾',
     'HAZE':'雾霾',
+    'DUST':'浮尘'
 }
 
 class Aqi():
