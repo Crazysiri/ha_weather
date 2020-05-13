@@ -204,8 +204,15 @@ class Forecast():
 
 	@property
 	def date(self):
-		"""更新时间 2010-10-10 """
+		"""更新时间 2010-10-10 13:00 或者 2010-10-10 """
 		return self._date
+
+	@property		
+	def time(self):
+		"""时间部分 13:00"""
+		if not self._time:
+			self._time = self.date.split(' ')[1]
+		return self._time
 
 	@property
 	def humidity(self):
@@ -275,6 +282,7 @@ class Forecast():
 
 	#daily bool值 表示 是否是一天的 因为一天的需要解析 最大值和最小值 而 实时的只需要解析一个温度即可
 	def __init__(self,obj,daily):
+		self._time = None
 		self._obj = obj
 		self.parse(obj,daily)
 
@@ -309,7 +317,8 @@ class Forecast():
 		try:
 			self._probability = obj['pop']
 		except Exception as e:
-			pass
+			self._probability = 0
+			
 		self._pressure = obj['pres']
 		self._wind_degree = obj['wind_deg']
 		self._wind_direction = obj['wind_dir']

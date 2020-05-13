@@ -42,6 +42,10 @@ SKYCON_TYPE = {
     'DUST':'浮尘'
 }
 
+WEEK_TYPE = [
+	'周一','周二','周三','周四','周五','周六','周日'
+]
+
 class Aqi():
 
 	#空气质量相关
@@ -178,7 +182,21 @@ class Skycon():
 		self._skycon = skycon
 
 
+import datetime
+from datetime import timedelta,datetime 
+
 class ForecastDay():
+
+	@property
+	def week_description(self):
+		"""日期 解析出来的 如果是今天 就是今天，其它就是周一"""
+		return self._week_description
+
+
+	@property
+	def date_description(self):
+		"""日期 解析出来的 如果跨年就是2000.01.01，其它就是01.29类似"""
+		return self._date_description
 
 	@property
 	def date(self):
@@ -230,10 +248,23 @@ class ForecastDay():
 			self._skycon_average = Skycon()			
 		return self._skycon_average
 
+	def	__init__(self):
+		self._date_description = None
+		self._week_description = None
+
 	@date.setter
 	def date(self,date):
 		self._date = date
-
+		time = datetime.strptime(date,'%Y-%m-%dT%H:%M%z')
+		now = datetime.now()
+		if time.year == now.year and time.month == now.month and time.day == now.day:
+			self._week_description = '今天'	
+		else:
+			self._week_description = WEEK_TYPE[time.weekday()]
+		if time.year != now.year:
+			self._date_description = '%s-%s-%s' % (time.year,time.month,time.day)
+		else:
+			self._date_description = '%s-%s' % (time.month,time.day)
 
 
 class Forecast():
@@ -618,7 +649,7 @@ class CaiyunWeather():
 	def weather_url(self):
 		return self.url('weather')
 
-
+# print(WEEK_TYPE[datetime.now().weekday()])
 
 # w = 
 # w.load()

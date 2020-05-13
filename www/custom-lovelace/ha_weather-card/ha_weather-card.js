@@ -53,6 +53,8 @@ class HAWeatherCard extends Polymer.Element {
           font-size: 60px;
           text-align: center;
           padding-bottom: 50px;
+          padding-top: 30px;
+
         }
         .aqi,
         .alarm {
@@ -84,10 +86,11 @@ class HAWeatherCard extends Polymer.Element {
         }        
         .attributes {
           cursor: pointer;
-          justify-content: flex-start;
+          justify-content: center;
           align-items: center;
           color: var(--main-title-color);          
-          display: flex;               
+          display: flex;
+          margin-left: 15px;  
         }
         .attributes div{
           width: 30%;  
@@ -98,28 +101,33 @@ class HAWeatherCard extends Polymer.Element {
         }
 
         .description {
+          font-size: 17px;          
           color: var(--main-title-color);          
-          padding: 15px 10px 10px;
-        }        
-        .hourly {
+          padding: 75px 0px 15px;
+          text-align: center;          
+        }     
+        .daily_hourly {
           white-space: nowrap;
           overflow-x: scroll;
+          margin:10px 0x;
+        }
+        .daily_hourly::-webkit-scrollbar {
+          display: none;
         }
         .hourly_item {
           color: var(--main-title-color);          
           text-align: center;
           display: inline-block;
-          padding-left: 10px;
+          padding-left: 15px;
+          padding-right: 5px;
+
         }
-        .daily {
-          white-space: nowrap;
-          overflow-x: scroll;
-        }
+
         .daily_item {
           color: var(--main-title-color);          
           text-align: center;
           display: inline-block;
-          padding-left: 10px;
+          padding-left: 20px;
         }        
       </style>
       <ha-card>
@@ -154,28 +162,28 @@ class HAWeatherCard extends Polymer.Element {
               </div>
             </div>
 
-            <div class='description'>
-              <div> {{minutely_description}} <br> {{hourly_description}} </div>     
-            </div>
-
-            <div class="hourly">
+            <div class='description'> {{minutely_description}}</div>
+            <div class="daily_hourly">
               <template is="dom-repeat" items="{{hourlyList}}">
                   <div class="hourly_item">
-                    <div>{{item.date}}</div>
-                    <div>{{item.condition}}</div>
-                    <div>{{item.temperature}}</div>
-                    <div>降水概率{{item.probability}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.time}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.condition}}</div>
+                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.temperature}}</div>
+                    <template is="dom-if" if="[[item.is_probability]]">
+                      <div style='font-size: 10px;margin:0px 0px 6px 0px'>降水概率{{item.probability}}%</div>
+                    </template>                      
                   </div>
               </template>            
             </div>
-            <div class="daily">
+            <div class='description'> {{hourly_description}}</div>                            
+            <div class="daily_hourly">
               <template is="dom-repeat" items="{{dailyList}}">
                   <div class="daily_item">
-                    <div>{{item.date}}</div>
-                    <div>{{item.max}}</div>
-                    <div>{{item.min}}</div>
-                    <div>{{item.day}}</div>
-                    <div>{{item.night}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.week_description}}</div>                  
+                    <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.date_description}}</div>
+                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.min}}/{{item.max}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{item.day}}</div>
+                    <div style='font-size: 10px;margin:0px 0px 6px 0px'>{{item.night}}</div>
                   </div>
               </template>            
             </div> 

@@ -191,17 +191,24 @@ class HeFengWeather(WeatherEntity):
         hourlys = []
         if hefeng.hourly:
             for f in hefeng.hourly:
+                is_probability = True
+                if f.probability == '0':
+                    is_probability = False
                 hourlys.append({
                     'date':f.date,
+                    'time':f.time,
                     'condition':f.txt,
                     'temperature':f.temperature,
-                    'probability':f.probability
+                    'probability':f.probability,
+                    'is_probability':is_probability
                     })
         dailys = []
         if caiyun.daily.forecasts:
             for f in caiyun.daily.forecasts:
                 dailys.append({
                     'date':f.date,
+                    'week_description':f.week_description,
+                    'date_description':f.date_description,
                     'max': f.forecast_max.temperature,
                     'min': f.forecast_min.temperature,
                     'day': f.skycon_day.txt,
