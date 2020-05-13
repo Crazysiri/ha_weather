@@ -117,6 +117,7 @@ class HeFengWeather(WeatherEntity):
 
     def __init__(self, object_id,data):
         """Initialize the  weather."""
+        self._attributes = None
         self._temperature = None
         self._humidity = None
         self._wind_bearing = None
@@ -186,8 +187,24 @@ class HeFengWeather(WeatherEntity):
     @property
     def device_state_attributes(self):
         """设置其它一些属性值."""
+        return self._attributes
+
+
+    @asyncio.coroutine
+    def async_update(self):
+        """update函数变成了async_update."""
         caiyun = self._data.caiyun
         hefeng = self._data.hefeng
+
+        realtime = caiyun.realtime
+        if realtime:
+            self._temperature = realtime.temperature
+            self._humidity = realtime.humidity * 100
+            self._wind_bearing = realtime.wind_direction_description
+            self._wind_speed = realtime.wind_speed
+            self._pressure = realtime.pressure / 100
+            self._condition = realtime.skycon.txt
+
         hourlys = []
         if hefeng.hourly:
             for f in hefeng.hourly:
@@ -214,7 +231,7 @@ class HeFengWeather(WeatherEntity):
                     'day': f.skycon_day.txt,
                     'night': f.skycon_day.txt,
                     })
-        return {
+        self._attributes = {
             'description':caiyun.forecast_keypoint,
             'minutely_description':caiyun.minutely.description,
             'hourly_description':caiyun.hourly.description,
@@ -232,21 +249,8 @@ class HeFengWeather(WeatherEntity):
             },
             'hourlys': hourlys,
             'dailys': dailys
-        }
-
-
-    @asyncio.coroutine
-    def async_update(self):
-        """update函数变成了async_update."""
-        caiyun = self._data.caiyun
-        realtime = caiyun.realtime
-        if realtime:
-            self._temperature = realtime.temperature
-            self._humidity = realtime.humidity * 100
-            self._wind_bearing = realtime.wind_direction_description
-            self._wind_speed = realtime.wind_speed
-            self._pressure = realtime.pressure / 100
-            self._condition = realtime.skycon.txt
+        }            
+         
         _LOGGER.debug('async_update')
 
 
