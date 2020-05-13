@@ -84,10 +84,9 @@ class HAWeatherCard extends Polymer.Element {
         }        
         .attributes {
           cursor: pointer;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
           color: var(--main-title-color);          
-          margin: 5px 0px 5px 0px;
           display: flex;               
         }
         .attributes div{
@@ -95,8 +94,12 @@ class HAWeatherCard extends Polymer.Element {
         }
         .attributes div div{
           width: 90%;
-          margin: 5px 5px 0px 5px;
           align-items: center;
+        }
+
+        .description {
+          color: var(--main-title-color);          
+          padding: 15px 10px 10px;
         }        
         .hourly {
           white-space: nowrap;
@@ -151,7 +154,7 @@ class HAWeatherCard extends Polymer.Element {
               </div>
             </div>
 
-            <div>
+            <div class='description'>
               <div> {{minutely_description}} <br> {{hourly_description}} </div>     
             </div>
 
