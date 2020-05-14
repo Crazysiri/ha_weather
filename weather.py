@@ -44,7 +44,7 @@ ATTRIBUTION = "来自和风天气的天气数据"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
-    vol.Optional(CONF_DEVICE_TRACKER_ENTITY,default=''): cv.string,
+    vol.Optional(CONF_DEVICE_TRACKER_ENTITY,default=''): cv.entity_id,
     vol.Required(CONF_LOCATION): cv.string,
     vol.Optional(CONF_HEFENG_APPKEY,default=''): cv.string,
     vol.Required(CONF_HEFENG_FREE_APPKEY): cv.string,  
@@ -88,18 +88,18 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
-    async_add_devices([HeFengWeather(name,data)], True)
+    async_add_devices([HeFengWeather(hass,name,data)], True)
 
     if device:
         device_entity = hass.states.get(device)
-        if device_entity:
-            self.tracker_state.attributes.get('latitude')
+        if device_entity:          
+            return
             device_location =  "%s,%s" % (device_entity.attributes.get('longitude') + device_entity.attributes.get('latitude'))
             device_data = WeatherData(device_location,hefengkey,hefengfreekey,caiyunkey,free)
             yield from device_data.async_update(dt_util.now())
             async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
 
-            async_add_devices([HeFengWeather(device,device_data)], True)        
+            async_add_devices([HeFengWeather(hass,device,device_data)], True)        
 
 
 class WeatherData(object):
@@ -140,7 +140,7 @@ class WeatherData(object):
 class HeFengWeather(WeatherEntity):
     """Representation of a weather condition."""
 
-    def __init__(self, object_id,data):
+    def __init__(self,hass, object_id,data):
         """Initialize the  weather."""
         self._attributes = None
         self._temperature = None
@@ -149,6 +149,7 @@ class HeFengWeather(WeatherEntity):
         self._wind_speed = None
         self._pressure = None
         self._condition = None
+        self._hass = hass
 
         self._object_id = object_id
         self._data = data
