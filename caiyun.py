@@ -11,35 +11,51 @@ sys.path.append(path)
 import  UBWeatherReader
 from UBWeatherReader import WeatherReader
 
+#https://open.caiyunapp.com/通用预报接口/v2.5#.E5.A4.A9.E6.B0.94.E7.8E.B0.E8.B1.A1.E4.BB.A3.E7.A0.81
 CONDITION_CLASSES = {
-    'CLEAR_DAY':'sunny',
-    'CLEAR_NIGHT':'sunny',
-    'PARTLY_CLOUDY_DAY':'partlycloudy',
-    'PARTLY_CLOUDY_NIGHT':'partlycloudy',
-    'CLOUDY':'cloudy',
-    'RAIN':'rainy',
-    'LIGHT_RAIN':'rainy',
-    'SNOW':'snowy',
-    'WIND':'windy',
-    'FOG':'fog',
-    'HAZE':'fog',
-    'DUST':'fog',
-
+    'CLEAR_DAY':'sunny', #晴（白天）
+    'CLEAR_NIGHT':'sunny_night',#晴 （夜间）
+    'PARTLY_CLOUDY_DAY':'partlycloudy', #多云
+    'PARTLY_CLOUDY_NIGHT':'partlycloudy_night',#多云
+    'CLOUDY':'cloudy', #阴
+    'LIGHT_HAZE':'fog',#轻度雾霾
+    'MODERATE_HAZE':'fog',#中度雾霾
+    'HEAVY_HAZE':'fog',#重度雾霾
+    'LIGHT_RAIN':'rainy', #小雨    
+    'MODERATE_RAIN':'rainy',#中雨
+    'HEAVY_RAIN':'rainy',#大雨
+    'STORM_RAIN':'pouring',#暴雨
+    'FOG':'fog',#雾    
+    'LIGHT_SNOW':'snowy',#小雪
+    'MODERATE_SNOW':'snowy',#中雪
+    'HEAVY_SNOW':'snowy',#大雪
+    'STORM_SNOW':'snowy',#暴雪
+    'DUST':'fog', #浮尘
+    'SAND':'fog',#沙尘
+     'WIND':'windy',#大风
 }
 
 SKYCON_TYPE = {
-    'CLEAR_DAY':'晴天',
-    'CLEAR_NIGHT':'晴夜',
-    'PARTLY_CLOUDY_DAY':'多云',
-    'PARTLY_CLOUDY_NIGHT':'多云',
-    'CLOUDY':'阴',
-    'RAIN':'雨',
-    'LIGHT_RAIN':'小雨',
-    'SNOW':'雪',
-    'WIND':'风',
-    'FOG':'雾',
-    'HAZE':'雾霾',
-    'DUST':'浮尘'
+    'CLEAR_DAY':'晴天', #晴（白天）
+    'CLEAR_NIGHT':'晴夜',#晴 （夜间）
+    'PARTLY_CLOUDY_DAY':'多云', #多云
+    'PARTLY_CLOUDY_NIGHT':'多云',#多云
+    'CLOUDY':'阴', #阴
+    'LIGHT_HAZE':'轻度雾霾',#轻度雾霾
+    'MODERATE_HAZE':'中度雾霾',#中度雾霾
+    'HEAVY_HAZE':'重度雾霾',#重度雾霾
+    'LIGHT_RAIN':'小雨', #小雨    
+    'MODERATE_RAIN':'中雨',#中雨
+    'HEAVY_RAIN':'大雨',#大雨
+    'STORM_RAIN':'暴雨',#暴雨
+    'FOG':'雾',#雾    
+    'LIGHT_SNOW':'小雪',#小雪
+    'MODERATE_SNOW':'中雪',#中雪
+    'HEAVY_SNOW':'大雪',#大雪
+    'STORM_SNOW':'暴雪',#暴雪
+    'DUST':'浮尘', #浮尘
+    'SAND':'沙尘',#沙尘
+     'WIND':'大风',#大风
 }
 
 WEEK_TYPE = [
@@ -642,6 +658,7 @@ class CaiyunWeather():
 
 	def load(self):
 		self._reader.load()
+		self.parse()
 
 	def url(self,t):
 		return '%s/%s,%s/%s.json' % (self._base_url,self._longitude,self._latitude,t)

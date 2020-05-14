@@ -21,7 +21,7 @@ from . import hefeng
 
 _LOGGER = logging.getLogger(__name__)
 
-TIME_BETWEEN_UPDATES = timedelta(seconds=1800)
+TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
 DEFAULT_TIME = dt_util.now()
 
@@ -201,7 +201,7 @@ class HeFengWeather(WeatherEntity):
             self._wind_bearing = realtime.wind_direction_description
             self._wind_speed = realtime.wind_speed
             self._pressure = realtime.pressure / 100
-            self._condition = realtime.skycon.txt
+            self._condition = realtime.skycon.condition
 
         hourlys = []
         if hefeng.hourly:
@@ -212,7 +212,7 @@ class HeFengWeather(WeatherEntity):
                 hourlys.append({
                     'date':f.date,
                     'time':f.time,
-                    'condition':f.txt,
+                    'condition':f.condition,
                     'temperature':f.temperature,
                     'probability':f.probability,
                     'is_probability':is_probability
@@ -226,16 +226,17 @@ class HeFengWeather(WeatherEntity):
                     'date_description':f.date_description,
                     'max': f.forecast_max.temperature,
                     'min': f.forecast_min.temperature,
-                    'day': f.skycon_day.txt,
-                    'night': f.skycon_day.txt,
+                    'day': f.skycon_day.condition,
+                    'night': f.skycon_day.condition,
                     })
         self._attributes = {
+            'update_time':hefeng._now_reader.originalJson['update']['loc'],
             'description':caiyun.forecast_keypoint,
             'minutely_description':caiyun.minutely.description,
             'hourly_description':caiyun.hourly.description,
             'now': {
                 'temperature': caiyun.realtime.temperature,
-                'condition': caiyun.realtime.skycon.txt,
+                'condition': caiyun.realtime.skycon.condition,
                 'humidity': caiyun.realtime.humidity * 100,
                 'aqi': caiyun.realtime.aqi.aqi,
                 'pm25': caiyun.realtime.aqi.pm25,
@@ -254,5 +255,4 @@ class HeFengWeather(WeatherEntity):
         }            
          
         _LOGGER.debug('ha async update')
-
 
