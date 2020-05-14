@@ -29,7 +29,6 @@ class HAWeatherCard extends Polymer.Element {
           text-rendering: var(
             --paper-font-common-expensive-kerning_-_text-rendering
           );
-          opacity: var(--dark-primary-opacity);
           display: flex;
           justify-content: center;
           align-content: center;
@@ -63,7 +62,7 @@ class HAWeatherCard extends Polymer.Element {
           color: #fff;
           line-height: 20px;
           padding: 2px 5px 2px 5px;
-          margin: 0px 0px 0px 10px;
+          margin: 0px 0px 0px 25px;
           height: 20px;
         }        
         .aqi_level_0_bg {
@@ -134,25 +133,38 @@ class HAWeatherCard extends Polymer.Element {
         .daily_item {
           color: var(--main-title-color);          
           text-align: center;
-          display: inline-block;
-          padding-left: 20px;
+          padding-left: 15px;
+          padding-right: 5px;
+          display: flex;
+          justify-content: space-between;                
+          flex-direction: column;
         }    
 
         .line {
           background-color:rgba(255,255,255,0.3);
           height: 0.5px;
           margin: 0px 10px 0px 10px;
-        }    
+        } 
+
+        .icon {
+          width: 70px;
+          height: 70px;
+          margin-left: -20px;
+        } 
+        .icon_small {
+          width: 55px;
+          height: 55px;
+          margin-left: 0px;
+        }                   
       </style>
       <ha-card>
         <div class="container">
           <div style="align-items: baseline;">
-
             <div class="title">{{city}}市{{area}}区</div>
             <div class='header'>
               <div style="align-items: center;">
                 <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
-                [[condition]]
+                <i class="icon" style="background: none, url([[getWeatherIcon(condition)]]) no-repeat; background-size: contain;"></i>              
               </div>
             </div>
             <div class="temperature">{{temperature}}</div>
@@ -182,7 +194,7 @@ class HAWeatherCard extends Polymer.Element {
               <template is="dom-repeat" items="{{hourlyList}}">
                   <div class="hourly_item">
                     <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.time}}</div>
-                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{item.condition}}</div>
+                    <i class="icon_small" style="background: none, url([[getWeatherIcon(item.condition)]]) no-repeat; background-size: contain;"></i>                                  
                     <template is="dom-if" if="[[item.is_probability]]">
                       <div style='font-size: 10px;margin:0px 0px 10px 0px'>降水概率{{item.probability}}%</div>
                     </template>  
@@ -197,7 +209,13 @@ class HAWeatherCard extends Polymer.Element {
                   <div class="daily_item">
                     <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.week_description}}</div>                  
                     <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.date_description}}</div>
-                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{condition_combine(item.day, item.night)}}</div>                    
+                    <template is="dom-if" if="[[condition_is_equal(item.day,item.night)]]">
+                      <i class="icon_small" style="background: none, url([[getWeatherIcon(item.day)]]) no-repeat; background-size: contain;"></i>                                  
+                    </template>
+                    <template is="dom-if" if="[[!condition_is_equal(item.day,item.night)]]">
+                      <i class="icon_small" style="background: none, url([[getWeatherIcon(item.day)]]) no-repeat; background-size: contain;"></i>                                  
+                      <i class="icon_small" style="background: none, url([[getWeatherIcon(item.night)]]) no-repeat; background-size: contain;"></i>                                  
+                    </template>                    
                     <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{temperature_round(item.min,item.max)}}</div>
                   </div>
               </template>            
@@ -246,6 +264,25 @@ class HAWeatherCard extends Polymer.Element {
       'mdi:arrow-top-left', 'mdi:arrow-up', 'mdi:arrow-top-right',
       'mdi:arrow-right', 'mdi:arrow-bottom-right', 'mdi:arrow-down'
     ];
+    this.weatherIcons = {
+      'sunny': 'day',
+      'sunny_night': 'night',
+      'cloudy': 'cloudy',
+      'fog': 'cloudy',
+      'hail': 'rainy-7',
+      'lightning': 'thunder',
+      'lightning-rainy': 'thunder',
+      'partlycloudy': 'cloudy-day-3',
+      'partlycloudy_night': 'cloudy-night-3',
+      'pouring': 'rainy-6',
+      'rainy': 'rainy-5',
+      'snowy': 'snowy-6',
+      'snowy-rainy': 'rainy-7',
+      'sunny': 'day',
+      'windy': 'cloudy',
+      'windy-variant': 'cloudy-day-3',
+      exceptional: '!!'
+    };  
   }
 
   set hass(hass) {
@@ -264,6 +301,7 @@ class HAWeatherCard extends Polymer.Element {
     this.area = attributes['now']['area'];
     this.index = attributes['now']['index'];
     this.comfort = attributes['now']['comfort'];
+    this.update_time = attributes['update_time'];
 
     this.description = attributes['description'];
     this.minutely_description = attributes['minutely_description'];
@@ -281,12 +319,14 @@ class HAWeatherCard extends Polymer.Element {
   }
 
 
-  getIcon(index) {
+  getWeatherIcon(condition) {
     return `${
       this.config.icons
+        ? this.config.icons
+        : "https://cdn.jsdelivr.net/gh/bramkragten/custom-ui@master/weather-card/icons/animated/"
     }${
-      index
-    }.png`;
+        this.weatherIcons[condition]
+    }.svg`;
   }
 
   getWindDirIcon(degree) {
@@ -298,12 +338,12 @@ class HAWeatherCard extends Polymer.Element {
   }  
 
   //结合早晚的天气 如果一样的话
-  condition_combine(day,night) {
+  condition_is_equal(day,night) {
 
     if (day == night) {
-      return day;
+      return true;
     }
-    return day + '/' + night;
+    return false;
   }
 
   //最低最高气温

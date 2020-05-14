@@ -88,6 +88,11 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 class WeatherData(object):
 
     @property
+    def is_load(self):
+        """Return the name of the sensor."""
+        return self._is_load    
+
+    @property
     def hefeng(self):
         """Return the name of the sensor."""
         return self._hefeng
@@ -101,14 +106,19 @@ class WeatherData(object):
         self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)     
         comps = location.split(',')
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
+        self._is_load = False
 
     @asyncio.coroutine
     def async_update(self, now):
         """从远程更新信息."""
         self.hefeng.load()
         self.caiyun.load()
+        self._is_load = True
         _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
+    @is_load.setter
+    def is_load(self,is_load):
+        self._is_load = is_load
 
 class HeFengWeather(WeatherEntity):
     """Representation of a weather condition."""
@@ -191,6 +201,10 @@ class HeFengWeather(WeatherEntity):
     @asyncio.coroutine
     def async_update(self):
         """update函数变成了async_update."""
+        if not self._data.is_load:
+            return
+        self._data.is_load = False
+
         caiyun = self._data.caiyun
         hefeng = self._data.hefeng
 
