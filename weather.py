@@ -239,10 +239,13 @@ class HeFengWeather(WeatherEntity):
                 'humidity': caiyun.realtime.humidity * 100,
                 'aqi': caiyun.realtime.aqi.aqi,
                 'pm25': caiyun.realtime.aqi.pm25,
+                'pm10': caiyun.realtime.aqi.pm10,
                 'wind_direction': caiyun.realtime.wind_direction_description,
                 'wind_degree': caiyun.realtime.wind_direction,
                 'wind_speed': caiyun.realtime.wind_speed,
                 'pressure': caiyun.realtime.pressure / 100,
+                'index': caiyun.realtime.life_comfort_index,
+                'comfort': caiyun.realtime.life_comfort_desc,                
                 'city': hefeng.now.city,
                 'area': hefeng.now.area
             },

@@ -103,18 +103,20 @@ class HAWeatherCard extends Polymer.Element {
         .description {
           font-size: 15px;          
           color: var(--main-title-color);          
-          padding: 20px 0px 35px;
+          padding: 20px 0px 10px;
           text-align: center;          
         } 
         .detail {
           font-size: 15px;          
           color: var(--main-title-color);          
-          padding: 15px 15px 15px;
+          padding: 7px 20px 8px;
         }             
         .daily_hourly {
           white-space: nowrap;
           overflow-x: scroll;
-          margin:10px 0x;
+          display: flex;
+          justify-content: space-between;  
+          padding-top: 10px;                        
         }
         .daily_hourly::-webkit-scrollbar {
           display: none;
@@ -122,10 +124,11 @@ class HAWeatherCard extends Polymer.Element {
         .hourly_item {
           color: var(--main-title-color);          
           text-align: center;
-          display: inline-block;
           padding-left: 15px;
           padding-right: 5px;
-
+          display: flex;
+          justify-content: space-between;                
+          flex-direction: column;
         }
 
         .daily_item {
@@ -174,37 +177,43 @@ class HAWeatherCard extends Polymer.Element {
             </div>
 
             <div class='description'> {{minutely_description}}</div>
-            <div class='line'></div>
+            <div style='margin-top:30px;' class='line'></div>
             <div class="daily_hourly">
               <template is="dom-repeat" items="{{hourlyList}}">
                   <div class="hourly_item">
                     <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.time}}</div>
                     <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{item.condition}}</div>
-                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.temperature}}</div>
                     <template is="dom-if" if="[[item.is_probability]]">
                       <div style='font-size: 10px;margin:0px 0px 10px 0px'>降水概率{{item.probability}}%</div>
-                    </template>                      
+                    </template>  
+                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.temperature}}</div>                                        
                   </div>
               </template>            
             </div>
-            <div class='line'></div>
-
+            <div style='margin-top:30px;'></div>  
+            <div class='description'> {{hourly_description}}</div>                                            
             <div class="daily_hourly">
               <template is="dom-repeat" items="{{dailyList}}">
                   <div class="daily_item">
                     <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.week_description}}</div>                  
                     <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.date_description}}</div>
                     <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{condition_combine(item.day, item.night)}}</div>                    
-                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.min}}/{{item.max}}</div>
+                    <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{temperature_round(item.min,item.max)}}</div>
                   </div>
               </template>            
             </div> 
             <div class='line'></div>      
-            <div class='detail'>pm2.5: [[pm25]]</div>
+            <div class='detail'><div style='font-size: 12px;'>pm2.5</div><br><div style='font-size: 25px;margin-top:-15px;'>[[pm25]]</div></div>                  
             <div class='line'></div>      
-            <div class='detail'> {{hourly_description}}</div>                            
-            <div class='line'></div>      
-
+            <div class='line'></div>
+            <div class='detail'><div style='font-size: 12px;'>pm10</div><br><div style='font-size: 25px;margin-top:-15px;'>[[pm10]]</div></div>                  
+            <div class='line'></div>  
+            <div class='line'></div>
+            <div class='detail'><div style='font-size: 12px;'>舒适指数</div><br><div style='font-size: 25px;margin-top:-15px;'>[[index]]</div></div>                  
+            <div class='line'></div>  
+            <div class='line'></div>
+            <div class='detail'><div style='font-size: 12px;'>舒适度</div><br><div style='font-size: 25px;margin-top:-15px;'>[[comfort]]</div></div>                  
+            <div class='line'></div>              
           </div>
         </div>
 
@@ -250,9 +259,11 @@ class HAWeatherCard extends Polymer.Element {
     
     this.aqi = attributes['now']['aqi'];
     this.pm25 = attributes['now']['pm25'];
-
+    this.pm10 = attributes['now']['pm10'];
     this.city = attributes['now']['city'];
     this.area = attributes['now']['area'];
+    this.index = attributes['now']['index'];
+    this.comfort = attributes['now']['comfort'];
 
     this.description = attributes['description'];
     this.minutely_description = attributes['minutely_description'];
@@ -293,6 +304,12 @@ class HAWeatherCard extends Polymer.Element {
       return day;
     }
     return day + '/' + night;
+  }
+
+  //最低最高气温
+  temperature_round(min,max) {
+
+    return Math.round(min) + '/' + Math.round(max);
   }
 
   _fire(type, detail, options) {
