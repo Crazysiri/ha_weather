@@ -44,7 +44,7 @@ ATTRIBUTION = "来自和风天气的天气数据"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
-    vol.Optional(CONF_DEVICE_TRACKER_ENTITY,default=''): cv.entity_id,
+    vol.Optional(CONF_DEVICE_TRACKER_ENTITY,default=''): cv.string,
     vol.Required(CONF_LOCATION): cv.string,
     vol.Optional(CONF_HEFENG_APPKEY,default=''): cv.string,
     vol.Required(CONF_HEFENG_FREE_APPKEY): cv.string,  
