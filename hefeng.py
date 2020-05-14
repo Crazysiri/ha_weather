@@ -203,6 +203,15 @@ class Forecast():
 #common 一般的属性
 
 	@property
+	def city(self):
+		"""北京市"""
+		return self._city
+
+	@property
+	def area(self):
+		"""朝阳区"""
+		return self._area
+	@property
 	def date(self):
 		"""更新时间 2010-10-10 13:00 或者 2010-10-10 """
 		return self._date
@@ -285,6 +294,14 @@ class Forecast():
 		self._time = None
 		self._obj = obj
 		self.parse(obj,daily)
+
+	@city.setter
+	def city(self,city):
+		self._city = city
+
+	@area.setter
+	def area(self,area):
+		self._area = area
 
 	def parse(self,obj,daily):
 		#for hourly or now
@@ -452,7 +469,8 @@ class HeFengWeather():
 				self._suggestions.append(Suggestion(item))
 		if self._now_reader.originalJson:
 			self._now = Forecast(self._now_reader.originalJson['now'],False)
-
+			self._now.city = self._now_reader.originalJson['basic']['parent_city']
+			self._now.area = self._now_reader.originalJson['basic']['location']
 
 # print(obj.hourly[0].temperature)
 # obj.load()

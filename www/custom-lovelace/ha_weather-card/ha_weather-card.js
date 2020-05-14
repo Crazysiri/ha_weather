@@ -101,11 +101,16 @@ class HAWeatherCard extends Polymer.Element {
         }
 
         .description {
-          font-size: 17px;          
+          font-size: 15px;          
           color: var(--main-title-color);          
-          padding: 75px 0px 15px;
+          padding: 20px 0px 35px;
           text-align: center;          
-        }     
+        } 
+        .detail {
+          font-size: 15px;          
+          color: var(--main-title-color);          
+          padding: 15px 15px 15px;
+        }             
         .daily_hourly {
           white-space: nowrap;
           overflow-x: scroll;
@@ -128,13 +133,19 @@ class HAWeatherCard extends Polymer.Element {
           text-align: center;
           display: inline-block;
           padding-left: 20px;
-        }        
+        }    
+
+        .line {
+          background-color:rgba(255,255,255,0.3);
+          height: 0.5px;
+          margin: 0px 10px 0px 10px;
+        }    
       </style>
       <ha-card>
         <div class="container">
           <div style="align-items: baseline;">
 
-            <div class="title">北京市朝阳区</div>
+            <div class="title">{{city}}市{{area}}区</div>
             <div class='header'>
               <div style="align-items: center;">
                 <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
@@ -163,35 +174,37 @@ class HAWeatherCard extends Polymer.Element {
             </div>
 
             <div class='description'> {{minutely_description}}</div>
+            <div class='line'></div>
             <div class="daily_hourly">
               <template is="dom-repeat" items="{{hourlyList}}">
                   <div class="hourly_item">
                     <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.time}}</div>
-                    <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.condition}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{item.condition}}</div>
                     <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.temperature}}</div>
                     <template is="dom-if" if="[[item.is_probability]]">
-                      <div style='font-size: 10px;margin:0px 0px 6px 0px'>降水概率{{item.probability}}%</div>
+                      <div style='font-size: 10px;margin:0px 0px 10px 0px'>降水概率{{item.probability}}%</div>
                     </template>                      
                   </div>
               </template>            
             </div>
-            <div class='description'> {{hourly_description}}</div>                            
+            <div class='line'></div>
+
             <div class="daily_hourly">
               <template is="dom-repeat" items="{{dailyList}}">
                   <div class="daily_item">
-                    <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.week_description}}</div>                  
-                    <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.date_description}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 8px 0px'>{{item.week_description}}</div>                  
+                    <div style='font-size: 15px;margin:0px 0px 12px 0px'>{{item.date_description}}</div>
+                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{condition_combine(item.day, item.night)}}</div>                    
                     <div style='font-size: 17px;margin:0px 0px 10px 0px'>{{item.min}}/{{item.max}}</div>
-                    <div style='font-size: 15px;margin:0px 0px 6px 0px'>{{item.day}}</div>
-                    <div style='font-size: 10px;margin:0px 0px 6px 0px'>{{item.night}}</div>
                   </div>
               </template>            
             </div> 
-            <div>
-              <div>
-                pm2.5: [[pm25]]
-              </div>
-            </div>  
+            <div class='line'></div>      
+            <div class='detail'>pm2.5: [[pm25]]</div>
+            <div class='line'></div>      
+            <div class='detail'> {{hourly_description}}</div>                            
+            <div class='line'></div>      
+
           </div>
         </div>
 
@@ -238,6 +251,9 @@ class HAWeatherCard extends Polymer.Element {
     this.aqi = attributes['now']['aqi'];
     this.pm25 = attributes['now']['pm25'];
 
+    this.city = attributes['now']['city'];
+    this.area = attributes['now']['area'];
+
     this.description = attributes['description'];
     this.minutely_description = attributes['minutely_description'];
     this.hourly_description = attributes['hourly_description'];
@@ -269,6 +285,15 @@ class HAWeatherCard extends Polymer.Element {
   aqiLevel(aqi) {
     return 'aqi_level_'+parseInt(aqi / 50.0)+'_bg';
   }  
+
+  //结合早晚的天气 如果一样的话
+  condition_combine(day,night) {
+
+    if (day == night) {
+      return day;
+    }
+    return day + '/' + night;
+  }
 
   _fire(type, detail, options) {
     const node = this.shadowRoot;

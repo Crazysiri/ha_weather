@@ -98,9 +98,7 @@ class WeatherData(object):
         return self._caiyun
 
     def __init__(self,location,hefengkey,hefengfreekey,caiyunkey,free):
-        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)
-        _LOGGER.info("free")
-        _LOGGER.info(self._hefeng._free)       
+        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)     
         comps = location.split(',')
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
 
@@ -244,13 +242,14 @@ class HeFengWeather(WeatherEntity):
                 'wind_direction': caiyun.realtime.wind_direction_description,
                 'wind_degree': caiyun.realtime.wind_direction,
                 'wind_speed': caiyun.realtime.wind_speed,
-                'pressure': caiyun.realtime.pressure / 100
-
+                'pressure': caiyun.realtime.pressure / 100,
+                'city': hefeng.now.city,
+                'area': hefeng.now.area
             },
             'hourlys': hourlys,
             'dailys': dailys
         }            
          
-        _LOGGER.debug('async_update')
+        _LOGGER.debug('ha async update')
 
 
