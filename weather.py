@@ -91,15 +91,12 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     async_add_devices([HeFengWeather(hass,name,data)], True)
 
     if device:
-        device_entity = hass.states.get(device)
-        if device_entity:          
-            return
-            device_location =  "%s,%s" % (device_entity.attributes.get('longitude') + device_entity.attributes.get('latitude'))
-            device_data = WeatherData(device_location,hefengkey,hefengfreekey,caiyunkey,free)
-            yield from device_data.async_update(dt_util.now())
-            async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
+        device_data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,free)
+        yield from device_data.async_update(dt_util.now())
+        async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
+        name = '_'.join(device.split('.'))
+        async_add_devices([HefengWeatherLocation(hass,name,device_data,device)], True)                
 
-            async_add_devices([HeFengWeather(hass,device,device_data)], True)        
 
 
 class WeatherData(object):
@@ -136,6 +133,8 @@ class WeatherData(object):
     @is_load.setter
     def is_load(self,is_load):
         self._is_load = is_load
+
+
 
 class HeFengWeather(WeatherEntity):
     """Representation of a weather condition."""
@@ -215,10 +214,7 @@ class HeFengWeather(WeatherEntity):
         """设置其它一些属性值."""
         return self._attributes
 
-
-    @asyncio.coroutine
-    def async_update(self):
-        """update函数变成了async_update."""
+    def setAttributes(self):
         if not self._data.is_load:
             return
         self._data.is_load = False
@@ -285,6 +281,26 @@ class HeFengWeather(WeatherEntity):
             'hourlys': hourlys,
             'dailys': dailys
         }            
-         
+
+    @asyncio.coroutine
+    def async_update(self):
+        """update函数变成了async_update."""        
+        self.setAttributes()
         _LOGGER.debug('ha async update')
+
+
+
+class HefengWeatherLocation(HeFengWeather):
+
+
+    def __init__(self,hass, object_id,data,device):
+        super(HefengWeatherLocation, self).__init__(hass, object_id,data)
+        _LOGGER.info("HefengWeatherLocation init")
+
+
+    @asyncio.coroutine
+    def async_update(self):
+        _LOGGER.info("start")
+        self.setAttributes()                
+        _LOGGER.info("end")
 
