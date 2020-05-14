@@ -447,7 +447,7 @@ class HeFengWeather():
 	def load(self):
 		self._now_reader.load()
 		self._forecast_reader.load()
-		self._hourly_reader.load()
+		# self._hourly_reader.load()
 		self._lifestyle_reader.load()
 		self._air_reader.load()
 		self.parse()

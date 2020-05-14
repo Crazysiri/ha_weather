@@ -25,6 +25,8 @@ TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
 DEFAULT_TIME = dt_util.now()
 
+CONF_DEVICE_TRACKER_ENTITY = 'device'
+
 CONF_LOCATION = 'location'
 CONF_HEFENG_APPKEY = 'hefengkey'
 CONF_HEFENG_FREE_APPKEY = 'hefengfreekey'
@@ -41,7 +43,8 @@ ATTRIBUTION = "来自和风天气的天气数据"
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    # vol.Required(CONF_NAME): cv.string,
+    vol.Required(CONF_NAME): cv.string,
+    vol.Optional(CONF_DEVICE_TRACKER_ENTITY,default=''): cv.string,
     vol.Required(CONF_LOCATION): cv.string,
     vol.Optional(CONF_HEFENG_APPKEY,default=''): cv.string,
     vol.Required(CONF_HEFENG_FREE_APPKEY): cv.string,  
@@ -59,10 +62,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
+    name = config.get(CONF_NAME)
     location = config.get(CONF_LOCATION)
     hefengkey = config.get(CONF_HEFENG_APPKEY)
     hefengfreekey = config.get(CONF_HEFENG_FREE_APPKEY)
     caiyunkey = config.get(CONF_CAIYUN_APPKEY)
+
+    device = config.get(CONF_DEVICE_TRACKER_ENTITY)
 
     #这里是确定哪些是免费哪些是收费api，默认都是免费即下面的位运算的值都需要 或运算，相关相当于二进制：11111    
     free = 0
@@ -82,7 +88,18 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
-    async_add_devices([HeFengWeather('my weather',data)], True)
+    async_add_devices([HeFengWeather(name,data)], True)
+
+    if device:
+        device_entity = hass.states.get(device)
+        if device_entity:
+            self.tracker_state.attributes.get('latitude')
+            device_location =  "%s,%s" % (device_entity.attributes.get('longitude') + device_entity.attributes.get('latitude'))
+            device_data = WeatherData(device_location,hefengkey,hefengfreekey,caiyunkey,free)
+            yield from device_data.async_update(dt_util.now())
+            async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
+
+            async_add_devices([HeFengWeather(device,device_data)], True)        
 
 
 class WeatherData(object):

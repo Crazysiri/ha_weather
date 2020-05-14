@@ -272,7 +272,7 @@ class ForecastDay():
 	def date(self,date):
 		self._date = date
 		time = datetime.strptime(date,'%Y-%m-%dT%H:%M%z')
-		now = datetime.now()
+		now = datetime.utcnow() + timedelta(hours=8)	#服务器获取的时间 需要加8小时 	
 		if time.year == now.year and time.month == now.month and time.day == now.day:
 			self._week_description = '今天'	
 		else:
