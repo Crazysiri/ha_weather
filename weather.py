@@ -104,7 +104,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     if device:
         name = '_'.join(device.split('.'))        
         data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,name,free)
-        entity = HeFengWeather(hass,name,data)        
+        entity = HefengWeatherLocation(hass,name,data,device)        
         hass.data[DATA_KEY] += [entity]        
         async_add_devices([entity], True)      
 
@@ -317,7 +317,6 @@ class HeFengWeather(WeatherEntity):
     def async_update(self):
         """update函数变成了async_update."""        
         self.setAttributes()
-        _LOGGER.debug('ha async update')
 
 
 
@@ -345,4 +344,5 @@ class HefengWeatherLocation(HeFengWeather):
     @asyncio.coroutine
     def async_update(self):
         self.setAttributes()                
+        _LOGGER.debug('ha async update')
 
