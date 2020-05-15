@@ -629,6 +629,7 @@ class CaiyunWeather():
 
 	def __init__(self,token,location,save_name_pre='home'):
 		self._realtime = None
+		self._location = None
 		self._minutely = None
 		self._hourly = None
 		self._daily = None

@@ -385,6 +385,7 @@ class HeFengWeather():
 	 save_name_pre ： 定制化存储的名字，例如a 地点的是home b地点的是office
 	 free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
 	def __init__(self,location,appkey,freeappkey,save_name_pre='home',free=HEFENG_NOW_IS_FREE|HEFENG_FORECAST_IS_FREE|HEFENG_HOURLY_IS_FREE|HEFENG_AIR_IS_FREE|HEFENG_LIFESTYLE_IS_FREE):
+		self._location = None		
 		self._daily = None
 		self._hourly = None
 		self._now = None
