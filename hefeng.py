@@ -455,12 +455,18 @@ class HeFengWeather():
 			self._lifestyle_reader.setURL(self.lifestyle_url(),None)
 			self._air_reader.setURL(self.air_url(),None)
 
-	def load(self):
-		self._now_reader.load()
-		self._forecast_reader.load()
-		# self._hourly_reader.load()
-		self._lifestyle_reader.load()
-		self._air_reader.load()
+#彩云｜和风实时 4｜和风空气质量 3｜和风小时 2｜和风天级 1｜和风舒适及穿衣指数 0
+	def load(self,api_type='11111'):
+		if api_type[0] == '1': 
+			self._lifestyle_reader.load()
+		if api_type[1] == '1':
+			self._forecast_reader.load()
+		if api_type[2] == '1':
+			self._hourly_reader.load()
+		if api_type[3] == '1':
+			self._air_reader.load()
+		if api_type[4] == '1':
+			self._now_reader.load()									
 		self.parse()
 
 	def parse(self):

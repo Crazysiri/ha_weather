@@ -9,6 +9,8 @@ from homeassistant.helpers.event import async_track_time_interval
 
 import voluptuous as vol
 
+from homeassistant import loader
+
 from homeassistant.components.weather import (
     WeatherEntity, ATTR_FORECAST_CONDITION, ATTR_FORECAST_TEMP,
     ATTR_FORECAST_TEMP_LOW, ATTR_FORECAST_PRECIPITATION, ATTR_FORECAST_TIME, PLATFORM_SCHEMA)
@@ -23,7 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'ha_weather'
 
-TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
+DATA_KEY = DOMAIN + '_hf_cy'
+# TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
 DEFAULT_TIME = dt_util.now()
 
@@ -43,6 +46,7 @@ CONF_HEFENG_LIFESTYLE_IS_FREE = 'free_lifestyle'
 
 ATTRIBUTION = "来自和风天气的天气数据"
 
+Weather_entities = {}
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_NAME): cv.string,
@@ -64,6 +68,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up the hefeng weather."""
     _LOGGER.info("setup platform weather.Heweather...")
+
+    if DATA_KEY not in hass.data:
+        hass.data[DATA_KEY] = []
+
     name = config.get(CONF_NAME)
     location = config.get(CONF_LOCATION)
     hefengkey = config.get(CONF_HEFENG_APPKEY)
@@ -87,22 +95,34 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
 
     data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,'home',free)
-    yield from data.async_update(dt_util.now())
-    async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
-
-    async_add_devices([HeFengWeather(hass,name,data)], True)
+    entity = HeFengWeather(hass,name,data)
+    hass.data[DATA_KEY] += [entity]
+    async_add_devices([entity], True)    
+    # yield from data.async_update(dt_util.now())
+    # async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
     if device:
         name = '_'.join(device.split('.'))        
-        device_data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,name,free)
-        yield from device_data.async_update(dt_util.now())
-        async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
-        async_add_devices([HefengWeatherLocation(hass,name,device_data,device)], True)                
+        data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,name,free)
+        entity = HeFengWeather(hass,name,data)        
+        hass.data[DATA_KEY] += [entity]        
+        async_add_devices([entity], True)      
 
-    # hass.services.register(DOMAIN, 'reload_data', self.download_file,
-    #                        schema=vol.Schema({
-    #                        vol.Required(ATTR_URL,default=download_url):cv.url,
-    #                        vol.Required(ATTR_FILENAME,default= file_name):cv.string}))
+
+    def reload_data_service_callback(service):
+        entity_id = service.data['entity_id']
+        api_type = service.data['api_type']
+        for entity in hass.data[DATA_KEY]:
+            if entity.entity_id == entity_id:
+                entity.reload(api_type)
+
+
+    hass.services.async_register(DOMAIN, 'reload_data', reload_data_service_callback,
+                           schema=vol.Schema({
+                           vol.Required('entity_id'):cv.string,
+                           vol.Required('api_type'):cv.string
+                           }))
+    _LOGGER.info('async_setup_platform')        
 
 
 class WeatherData(object):
@@ -127,13 +147,13 @@ class WeatherData(object):
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,location,save_name_pre=save_name_pre)
         self._is_load = False
 
-    @asyncio.coroutine
-    def async_update(self, now):
-        """从远程更新信息."""
-        self.hefeng.load()
-        self.caiyun.load()
+    #彩云5｜和风实时 4｜和风空气质量 3｜和风小时 2｜和风天级 1｜和风舒适及穿衣指数 0
+    def reload(self,api_type='111111'):
+        if api_type[5] == '1':
+            self.caiyun.load()
+        self.hefeng.load(api_type)            
+
         self._is_load = True
-        _LOGGER.info("Update from JingdongWangxiang's OpenAPI...")
 
     @is_load.setter
     def is_load(self,is_load):
@@ -157,6 +177,8 @@ class HeFengWeather(WeatherEntity):
 
         self._object_id = object_id
         self._data = data
+        
+        data.reload()
         _LOGGER.debug('__init__')
 
     @property
@@ -218,6 +240,10 @@ class HeFengWeather(WeatherEntity):
     def device_state_attributes(self):
         """设置其它一些属性值."""
         return self._attributes
+
+    def reload(self,api_type='111111'):
+        self._data.reload(api_type)
+        self.setAttributes()
 
     def setAttributes(self):
         if not self._data.is_load:
@@ -297,17 +323,13 @@ class HeFengWeather(WeatherEntity):
 
 class HefengWeatherLocation(HeFengWeather):
 
-
-
     def __init__(self,hass, object_id,data,device):
         super(HefengWeatherLocation, self).__init__(hass, object_id,data)
         self._device_tracker_id = device
         self._device_tracker = None
         _LOGGER.info("HefengWeatherLocation init")
 
-    #该方法目前观察来看 会比较频繁调用 大概30秒一次，可能是系统控制的，这里只设置定位，但不更新数据，更新数据由上面设定好的WeatherData中的asyn_update 更新
-    @asyncio.coroutine
-    def async_update(self):
+    def reload(self,api_type):
         if not self._device_tracker:
             self._device_tracker = self._hass.states.get(self._device_tracker_id)
         if self._device_tracker:
@@ -316,6 +338,11 @@ class HefengWeatherLocation(HeFengWeather):
             location = '%s,%s' % (longitude,latitude)      
             self._data.caiyun.setLocation(location)
             self._data.hefeng.setLocation(location)
-            _LOGGER.info(location)
+            _LOGGER.info(location)        
+        super(HefengWeatherLocation,self).reload(api_type)
+
+    #该方法目前观察来看 会比较频繁调用 大概30秒一次，可能是系统控制的，这里只设置定位，但不更新数据，更新数据由上面设定好的WeatherData中的asyn_update 更新
+    @asyncio.coroutine
+    def async_update(self):
         self.setAttributes()                
 
