@@ -21,6 +21,8 @@ from . import hefeng
 
 _LOGGER = logging.getLogger(__name__)
 
+DOMAIN = 'ha_weather'
+
 TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
 DEFAULT_TIME = dt_util.now()
@@ -84,19 +86,23 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
         free = free | hefeng.HEFENG_LIFESTYLE_IS_FREE
 
 
-    data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,free)
+    data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,'home',free)
     yield from data.async_update(dt_util.now())
     async_track_time_interval(hass, data.async_update, TIME_BETWEEN_UPDATES)
 
     async_add_devices([HeFengWeather(hass,name,data)], True)
 
     if device:
-        device_data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,free)
+        name = '_'.join(device.split('.'))        
+        device_data = WeatherData(location,hefengkey,hefengfreekey,caiyunkey,name,free)
         yield from device_data.async_update(dt_util.now())
         async_track_time_interval(hass, device_data.async_update, TIME_BETWEEN_UPDATES)
-        name = '_'.join(device.split('.'))
         async_add_devices([HefengWeatherLocation(hass,name,device_data,device)], True)                
 
+    # hass.services.register(DOMAIN, 'reload_data', self.download_file,
+    #                        schema=vol.Schema({
+    #                        vol.Required(ATTR_URL,default=download_url):cv.url,
+    #                        vol.Required(ATTR_FILENAME,default= file_name):cv.string}))
 
 
 class WeatherData(object):
@@ -116,9 +122,9 @@ class WeatherData(object):
         """Return the name of the sensor."""
         return self._caiyun
 
-    def __init__(self,location,hefengkey,hefengfreekey,caiyunkey,free):
-        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)     
-        self._caiyun = caiyun.CaiyunWeather(caiyunkey,location)
+    def __init__(self,location,hefengkey,hefengfreekey,caiyunkey,save_name_pre,free):
+        self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,save_name_pre=save_name_pre,free=free)     
+        self._caiyun = caiyun.CaiyunWeather(caiyunkey,location,save_name_pre=save_name_pre)
         self._is_load = False
 
     @asyncio.coroutine
