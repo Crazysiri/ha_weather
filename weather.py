@@ -118,8 +118,7 @@ class WeatherData(object):
 
     def __init__(self,location,hefengkey,hefengfreekey,caiyunkey,free):
         self._hefeng = hefeng.HeFengWeather(location,hefengkey,hefengfreekey,free=free)     
-        comps = location.split(',')
-        self._caiyun = caiyun.CaiyunWeather(caiyunkey,comps[0],comps[1])
+        self._caiyun = caiyun.CaiyunWeather(caiyunkey,location)
         self._is_load = False
 
     @asyncio.coroutine
@@ -229,7 +228,7 @@ class HeFengWeather(WeatherEntity):
             self._wind_bearing = realtime.wind_direction_description
             self._wind_speed = realtime.wind_speed
             self._pressure = realtime.pressure / 100
-            self._condition = realtime.skycon.condition
+            self._condition = realtime.skycon.txt
 
         hourlys = []
         if hefeng.hourly:
@@ -293,14 +292,24 @@ class HeFengWeather(WeatherEntity):
 class HefengWeatherLocation(HeFengWeather):
 
 
+
     def __init__(self,hass, object_id,data,device):
         super(HefengWeatherLocation, self).__init__(hass, object_id,data)
+        self._device_tracker_id = device
+        self._device_tracker = None
         _LOGGER.info("HefengWeatherLocation init")
 
-
+    #该方法目前观察来看 会比较频繁调用 大概30秒一次，可能是系统控制的，这里只设置定位，但不更新数据，更新数据由上面设定好的WeatherData中的asyn_update 更新
     @asyncio.coroutine
     def async_update(self):
-        _LOGGER.info("start")
+        if not self._device_tracker:
+            self._device_tracker = self._hass.states.get(self._device_tracker_id)
+        if self._device_tracker:
+            latitude = self._device_tracker.attributes.get('latitude')
+            longitude = self._device_tracker.attributes.get('longitude')  
+            location = '%s,%s' % (longitude,latitude)      
+            self._data.caiyun.setLocation(location)
+            self._data.hefeng.setLocation(location)
+            _LOGGER.info(location)
         self.setAttributes()                
-        _LOGGER.info("end")
 

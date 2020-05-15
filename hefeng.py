@@ -394,18 +394,18 @@ class HeFengWeather():
 			print('location or appkey must not be null')
 			return
 		self._free_aqi_city = 'beijing' #默认为beijing 免费api 只能是类似这样的参数
-		self._location = location
 		self._appkey = appkey
 		self._freeappkey = freeappkey
 		self._free = free
 
 		# url = "https://way.jd.com/he/freeweather?city=%s&appkey=%s" % (self._city,self._appkey)
 		# self._reader = WeatherReader(url,None,['result','HeWeather6',0])
-		self._now_reader = WeatherReader(self.now_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_now')
-		self._forecast_reader = WeatherReader(self.forecast_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_daily')
-		self._hourly_reader = WeatherReader(self.hourly_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_hourly')
-		self._lifestyle_reader = WeatherReader(self.lifestyle_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_lifestyle')
-		self._air_reader = WeatherReader(self.air_url(),None,['HeWeather6',0],save_name_pre + '_hefeng_air')
+		self._now_reader = WeatherReader(['HeWeather6',0],save_name_pre + '_hefeng_now')
+		self._forecast_reader = WeatherReader(['HeWeather6',0],save_name_pre + '_hefeng_daily')
+		self._hourly_reader = WeatherReader(['HeWeather6',0],save_name_pre + '_hefeng_hourly')
+		self._lifestyle_reader = WeatherReader(['HeWeather6',0],save_name_pre + '_hefeng_lifestyle')
+		self._air_reader = WeatherReader(['HeWeather6',0],save_name_pre + '_hefeng_air')
+		self.setLocation(location)		
 		self.parse()
 
 	#如果使用免费api 必须设置这个 否则报错 默认 'beijing'		
@@ -444,10 +444,20 @@ class HeFengWeather():
 		else:
 			return base_url + '/air/now' +  '?location=' + self._location + '&key=' + self._appkey
 
+	#重新设置定位
+	def setLocation(self,location):
+		if self._location != location:
+			self._location = location
+			self._now_reader.setURL(self.now_url(),None)
+			self._forecast_reader.setURL(self.forecast_url(),None)
+			self._hourly_reader.setURL(self.hourly_url(),None)
+			self._lifestyle_reader.setURL(self.lifestyle_url(),None)
+			self._air_reader.setURL(self.air_url(),None)
+
 	def load(self):
 		self._now_reader.load()
 		self._forecast_reader.load()
-		self._hourly_reader.load()
+		# self._hourly_reader.load()
 		self._lifestyle_reader.load()
 		self._air_reader.load()
 		self.parse()

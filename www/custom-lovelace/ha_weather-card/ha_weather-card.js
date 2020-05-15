@@ -149,7 +149,7 @@ class HAWeatherCard extends Polymer.Element {
         .icon {
           width: 70px;
           height: 70px;
-          margin-left: -20px;
+          margin-left: -10px;
         } 
         .icon_small {
           width: 55px;
@@ -162,7 +162,7 @@ class HAWeatherCard extends Polymer.Element {
           <div style="align-items: baseline;">
             <div class="title">{{city}}市{{area}}区</div>
             <div class='header'>
-              <div style="align-items: center;">
+              <div style="margin-top:-10px;align-items: center;">
                 <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
                 <i class="icon" style="background: none, url([[getWeatherIcon(condition)]]) no-repeat; background-size: contain;"></i>              
               </div>

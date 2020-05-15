@@ -625,12 +625,9 @@ class CaiyunWeather():
 		"""Return the attribution."""
 		return self._reader
 
-	def setLocation(self,longi,lat):
-		self._longitude = longi
-		self._latitude = lat
 
 
-	def __init__(self,token,longi,lat,save_name_pre='home'):
+	def __init__(self,token,location,save_name_pre='home'):
 		self._realtime = None
 		self._minutely = None
 		self._hourly = None
@@ -639,10 +636,9 @@ class CaiyunWeather():
 		self._forecast_keypoint = None
 		self._alerts = []
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
-		self.setLocation(longi,lat)
 
-		self._reader = WeatherReader(self.weather_url(),'?alert=true',['result'],save_name_pre + '_caiyun_weather')
-
+		self._reader = WeatherReader(['result'],save_name_pre + '_caiyun_weather')
+		self.setLocation(location)
 		self.parse()
 
 	def parse(self):
@@ -656,12 +652,18 @@ class CaiyunWeather():
 			for content in obj['alert']['content']:
 				self._alerts.append(Alert(content))
 
+
+	def setLocation(self,location):
+		if self._location != location:
+			self._location = location
+			self._reader.setURL(self.weather_url(),'?alert=true')
+
 	def load(self):
 		self._reader.load()
 		self.parse()
 
 	def url(self,t):
-		return '%s/%s,%s/%s.json' % (self._base_url,self._longitude,self._latitude,t)
+		return '%s/%s/%s.json' % (self._base_url,self._location,t)
 
 	def weather_url(self):
 		return self.url('weather')

@@ -6,6 +6,7 @@ import hashlib
 
 """
 每次会缓存一个 originalJson的字段 从服务端拿到的原始json格式的数据 load完可以直接获取
+调用顺序 1.init 2.setURL 3.load 4.originalJson
 """
 class WeatherReader():
 
@@ -15,24 +16,27 @@ class WeatherReader():
 		return self._originalJson
 
 
-	def __init__(self,url,params,parses,savename = None):
+	def __init__(self,parses,savename = None):
 		"""
 		savename 存储时用，如果有name 就不md5随机值了
 		parses 是解析的层级 例如和风 需要解析到 ['result']['HeWeather5']
 		"""
-		self._url = url
-
 		self._savename = savename
 
 		self._parses = parses
 
 		self._originalJson = None
 
+
+	def setURL(self,url,params):
+		self._url = url
 		if params == None:
 			params = ''
-		self._params = params
+		self._params = params	
+		#每次重启没数据的时候加载一次就可以
+		if not self._originalJson:	
+			self.readFromJson()
 
-		self.readFromJson()
 
 	def load(self):
 		print(self._url+self._params)
