@@ -371,7 +371,7 @@ class HAWeatherCard extends Polymer.Element {
 
   _refresh() {
     this._hass.callService('ha_weather','reload_data',{
-      entity_id: 'weather.home',
+      entity_id: this.config.entity,
       api_type: '110111'
     });
   }
