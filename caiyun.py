@@ -117,6 +117,15 @@ class Aqi():
 		self._aqi_usa = aqi_usa
 
 	def __init__(self,obj=None):
+		self._aqi = 0
+		self._aqi_usa = 0
+		self._co = 0
+		self._o3 = 0
+		self._pm10 = 0
+		self._pm25 = 0				
+		self._quality = ''
+		self._quality_usa = ''
+		self._so2 = 0		
 		self._obj = obj
 		if obj:
 			self.parse(obj)
@@ -162,9 +171,10 @@ class Alert():
 		"""将于xx年发布雷电黄色预警，注意防范！"""
 		return self._description	
 
-	def __init__(self,obj):
+	def __init__(self,obj=None):
 		self._obj = obj
-		self.parse(obj)
+		if obj:
+			self.parse(obj)
 	
 	def parse(self,obj):
 		# obj = obj['content']
@@ -196,6 +206,9 @@ class Skycon():
 	@skycon.setter
 	def skycon(self,skycon):
 		self._skycon = skycon
+
+	def	__init__(self):
+		self._skycon = 'CLEAR_DAY'
 
 
 import datetime
@@ -302,11 +315,7 @@ class Forecast():
 
 	@property
 	def skycon(self):
-		"""PARTLY_CLOUDY_NIGHT"""
-		try:
-			f = self._skycon
-		except Exception as e:
-			self._skycon = Skycon()			
+		"""PARTLY_CLOUDY_NIGHT"""		
 		return self._skycon	
 
 	@property
@@ -342,10 +351,6 @@ class Forecast():
 	@property
 	def aqi(self):
 		"""Aqi class"""
-		try:
-			aqi = self._aqi
-		except Exception as e:
-			self._aqi = Aqi()
 		return self._aqi	
 
 	@property
@@ -416,6 +421,17 @@ class Forecast():
 
 
 	def __init__(self,obj=None):
+		self._date = ''			
+		self._temperature = 0
+		self._humidity = 0	
+		self._skycon = Skycon()
+		self._wind_speed = 0
+		self._wind_direction	= 0
+		self._pressure = 0
+		self._precipitation = 0
+		self._aqi  = Aqi()	
+		self._life_comfort_index = 0
+		self._life_comfort_desc	= ''	
 		self._obj = obj
 		if obj:
 			self.parse(obj)
@@ -457,9 +473,15 @@ class Minutely():
 		return self._description
 
 
-	def __init__(self,obj):
+	def __init__(self,obj=None):
+		self._precipitation_2h = []
+		self._precipitation = []
+		self._probability = []
+		self._description = ''
+
 		self._obj = obj
-		self.parse(obj)
+		if obj:
+			self.parse(obj)
 	
 	def parse(self,obj):
 		# self._precipitation_2h = obj['precipitation_2h']
@@ -473,10 +495,6 @@ class Hourly():
 	@property
 	def forecasts(self):
 		"""数组 [Forecast 类]"""
-		try:
-			f = self._forecasts
-		except Exception as e:
-			self._forecasts = []
 		return self._forecasts
 
 	@property
@@ -485,9 +503,12 @@ class Hourly():
 		return self._description
 
 
-	def __init__(self,obj):
+	def __init__(self,obj=None):
+		self._description = ''
+		self._forecasts = []
 		self._obj = obj
-		self.parse(obj)
+		if obj:
+			self.parse(obj)
 	
 	def parse(self,obj):
 		#未解析：cloudrate ,pressure ,visibility,dswrf: { "datetime": "2020-05-08T20:00+08:00","value": 0.3} 
@@ -523,9 +544,11 @@ class Daily():
 		return self._forecasts
 
 
-	def __init__(self,obj):
+	def __init__(self,obj=None):
+		self._forecasts = []
 		self._obj = obj
-		self.parse(obj)
+		if obj:
+			self.parse(obj)
 	
 	def parse(self,obj):
 		""" 未解析 astro [{
@@ -628,13 +651,13 @@ class CaiyunWeather():
 
 
 	def __init__(self,token,location,save_name_pre='home'):
-		self._realtime = None
-		self._location = None
-		self._minutely = None
-		self._hourly = None
-		self._daily = None
+		self._realtime = Forecast()
+		self._location = ''
+		self._minutely = Minutely()
+		self._hourly = Hourly()
+		self._daily = Daily()
 		self._reader = None
-		self._forecast_keypoint = None
+		self._forecast_keypoint = ''
 		self._alerts = []
 		self._base_url = 'https://api.caiyunapp.com/v2.5/' + token
 

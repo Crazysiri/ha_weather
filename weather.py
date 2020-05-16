@@ -147,7 +147,7 @@ class WeatherData(object):
         self._caiyun = caiyun.CaiyunWeather(caiyunkey,location,save_name_pre=save_name_pre)
         self._is_load = False
 
-    #彩云5｜和风实时 4｜和风空气质量 3｜和风小时 2｜和风天级 1｜和风舒适及穿衣指数 0
+    #和风实时｜和风空气质量｜和风小时｜和风天级｜和风舒适及穿衣指数|彩云
     def reload(self,api_type='111111'):
         if api_type[5] == '1':
             self.caiyun.load()

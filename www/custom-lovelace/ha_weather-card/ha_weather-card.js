@@ -160,7 +160,7 @@ class HAWeatherCard extends Polymer.Element {
       <ha-card>
         <div class="container">
           <div style="align-items: baseline;">
-            <div class="title">{{city}}市{{area}}区</div>
+            <div on-click="_refresh" class="title">{{city}}市{{area}}区</div>
             <div class='header'>
               <div style="margin-top:-10px;align-items: center;">
                 <div class$ = "aqi [[aqiLevel(aqi)]]">[[aqi]]</div>
@@ -367,6 +367,13 @@ class HAWeatherCard extends Polymer.Element {
   }
   _weatherAttr() {
     this._fire('hass-more-info', { entityId: this.config.entity });
+  }
+
+  _refresh() {
+    this._hass.callService('ha_weather','reload_data',{
+      entity_id: 'weather.home',
+      api_type: '110111'
+    });
   }
 }
 
