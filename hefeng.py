@@ -21,7 +21,7 @@ CONDITION_CLASSES = {
     'rainy': ["雨","毛毛雨", "小雨", "中雨", "大雨", "阵雨", "极端降雨"],
     'pouring': ["暴雨", "大暴雨", "特大暴雨", "强阵雨"],
     'lightning-rainy': ["雷阵雨", "强雷阵雨"],
-    'fog': ["雾", "薄雾","霾"],
+    'fog': ["雾", "薄雾","霾","浮尘"],
     'hail': ["雷阵雨伴有冰雹"],
     'snowy': ["雪","小雪", "中雪", "大雪", "暴雪", "阵雪"],
     'snowy-rainy': ["雨夹雪", "雨雪天气", "阵雨夹雪"],
@@ -59,9 +59,9 @@ class Suggestion():
 		return self._txt
 	"""docstring for suggestion"""
 	def __init__(self,obj):
-		self._type = None
-		self._brf = None
-		self._txt = None
+		self._type = ''
+		self._brf = ''
+		self._txt = ''
 		self._obj = obj
 		self.parse()
 
@@ -103,16 +103,17 @@ class Aqi():
 	def so2(self):
 		return self._so2
 
-	def __init__(self,obj):
-		self._aqi = None
-		self._co = None
-		self._o3 = None
-		self._pm10 = None
-		self._pm25 = None
-		self._quality = None
-		self._so2 = None
+	def __init__(self,obj=None):
+		self._aqi = 0
+		self._co = 0
+		self._o3 = 0
+		self._pm10 = 0
+		self._pm25 = 0
+		self._quality = ''
+		self._so2 = 0
 		self._obj = obj
-		self.parse()
+		if obj:
+			self.parse()
 	
 	def parse(self):
 		self._aqi = self._obj['aqi']
@@ -290,10 +291,11 @@ class Forecast():
 		return self._wind_direction_description
 
 	#daily bool值 表示 是否是一天的 因为一天的需要解析 最大值和最小值 而 实时的只需要解析一个温度即可
-	def __init__(self,obj,daily):
-		self._time = None
+	def __init__(self,obj=None,daily=False):
+		self._time = ''
 		self._obj = obj
-		self.parse(obj,daily)
+		if obj:
+			self.parse(obj,daily)
 
 	@city.setter
 	def city(self,city):
@@ -385,12 +387,12 @@ class HeFengWeather():
 	 save_name_pre ： 定制化存储的名字，例如a 地点的是home b地点的是office
 	 free 位运算 11111 now(16)|forecast(8)|hourly(4)|lifestyle(2)|air(1) """
 	def __init__(self,location,appkey,freeappkey,save_name_pre='home',free=HEFENG_NOW_IS_FREE|HEFENG_FORECAST_IS_FREE|HEFENG_HOURLY_IS_FREE|HEFENG_AIR_IS_FREE|HEFENG_LIFESTYLE_IS_FREE):
-		self._location = None		
-		self._daily = None
-		self._hourly = None
-		self._now = None
-		self._suggestions = None
-		self._aqi = None
+		self._location = ''		
+		self._daily = []
+		self._hourly = []
+		self._now = Forecast()
+		self._suggestions = []
+		self._aqi = Aqi()
 		if not location or not appkey:
 			print('location or appkey must not be null')
 			return
@@ -455,17 +457,17 @@ class HeFengWeather():
 			self._lifestyle_reader.setURL(self.lifestyle_url(),None)
 			self._air_reader.setURL(self.air_url(),None)
 
-#彩云｜和风实时 4｜和风空气质量 3｜和风小时 2｜和风天级 1｜和风舒适及穿衣指数 0
+#和风实时｜和风空气质量｜和风小时｜和风天级｜和风舒适及穿衣指数|彩云
 	def load(self,api_type='11111'):
-		if api_type[0] == '1': 
+		if api_type[4] == '1': 
 			self._lifestyle_reader.load()
-		if api_type[1] == '1':
+		if api_type[3] == '1':
 			self._forecast_reader.load()
 		if api_type[2] == '1':
 			self._hourly_reader.load()
-		if api_type[3] == '1':
+		if api_type[1] == '1':
 			self._air_reader.load()
-		if api_type[4] == '1':
+		if api_type[0] == '1':
 			self._now_reader.load()									
 		self.parse()
 
