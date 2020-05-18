@@ -183,7 +183,7 @@ class HAWeatherCard extends Polymer.Element {
                   <ha-icon icon="hass:[[getWindDirIcon(wind_degree)]]"></ha-icon>&nbsp;[[wind_direction]]
                 </div>
                 <div>
-                  <ha-icon icon="hass:weather-windy"></ha-icon>&nbsp;[[wind_speed]] km/h
+                  <ha-icon icon="hass:weather-windy"></ha-icon>&nbsp;[[wind_level]] 级
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ class HAWeatherCard extends Polymer.Element {
     this.hourly_description = attributes['hourly_description'];
     this.humidity = Math.round(attributes['now']['humidity']);
     this.pressure = Math.round(attributes['now']['pressure']);
-    this.wind_speed = Math.round(attributes['now']['wind_speed']);
+    this.wind_level = attributes['now']['wind_level'];
     this.wind_degree = attributes['now']['wind_degree'];
     this.wind_direction = attributes['now']['wind_direction'];
 

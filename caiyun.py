@@ -325,6 +325,51 @@ class Forecast():
 		return self._wind_speed
 
 	@property
+	def wind_level(self):
+		"""风力等级 1"""
+		if not self._wind_level:
+			speed = self.wind_speed
+			if speed:
+				if speed < 1:
+					level = 0
+				elif speed <= 5:
+					level = 1
+				elif speed <= 11:
+					level = 2
+				elif speed <= 19:
+					level = 3
+				elif speed <= 28:
+					level = 4
+				elif speed <= 38:
+					level = 5				
+				elif speed <= 49:
+					level = 6
+				elif speed <= 61:
+					level = 7
+				elif speed <= 74:
+					level = 8
+				elif speed <= 88:
+					level = 9
+				elif speed <= 102:
+					level = 10
+				elif speed <= 117:
+					level = 11
+				elif speed <= 133:
+					level = 12				
+				elif speed <= 149:
+					level = 13
+				elif speed <= 166:
+					level = 14
+				elif speed <= 183:
+					level = 15				
+				elif speed <= 201:
+					level = 16
+				elif speed <= 220:
+					level = 17
+				self._wind_level = level																
+		return self._wind_level
+
+	@property
 	def wind_direction(self):
 		"""风向 360度"""
 		return self._wind_direction	
@@ -360,28 +405,27 @@ class Forecast():
 
 	@property
 	def wind_direction_description(self):
-		try:
-			d = self._wind_direction_description
-		except Exception as e:
+		if not self._wind_direction_description:
 			direction = self.wind_direction
-			if direction > 337.4 or direction < 22.5:
-				final_direction = '北风'
-			elif direction > 22.4 and direction < 67.5:
-				final_direction = '东北风'
-			elif direction > 67.4 and direction < 112.5:
-				final_direction = '东风'
-			elif direction > 112.4 and direction < 157.5:
-				final_direction = '东南风'
-			elif direction > 157.4 and direction < 202.5:
-				final_direction = '南风'
-			elif direction > 202.4 and direction < 247.5:
-				final_direction = '西南风'
-			elif direction > 247.4 and direction < 292.5:
-				final_direction = '西风'
-			elif direction > 292.4 and direction < 337.5:
-				final_direction = '西北风'
-			else:
-				final_direction = '无数据'
+			if direction:
+				if direction > 337.4 or direction < 22.5:
+					final_direction = '北风'
+				elif direction > 22.4 and direction < 67.5:
+					final_direction = '东北风'
+				elif direction > 67.4 and direction < 112.5:
+					final_direction = '东风'
+				elif direction > 112.4 and direction < 157.5:
+					final_direction = '东南风'
+				elif direction > 157.4 and direction < 202.5:
+					final_direction = '南风'
+				elif direction > 202.4 and direction < 247.5:
+					final_direction = '西南风'
+				elif direction > 247.4 and direction < 292.5:
+					final_direction = '西风'
+				elif direction > 292.4 and direction < 337.5:
+					final_direction = '西北风'
+				else:
+					final_direction = '无数据'
 			self._wind_direction_description = final_direction
 		return self._wind_direction_description
 
@@ -416,6 +460,10 @@ class Forecast():
 
 
 	def __init__(self,obj=None):
+		self._wind_direction = None
+		self._wind_speed = None
+		self._wind_direction_description = None
+		self._wind_level = None
 		self._obj = obj
 		if obj:
 			self.parse(obj)
@@ -657,7 +705,7 @@ class CaiyunWeather():
 	def setLocation(self,location):
 		if self._location != location:
 			self._location = location
-			self._reader.setURL(self.weather_url(),'?alert=true')
+			self._reader.setURL(self.weather_url(),'?alert=true&dailysteps=7')
 
 	def load(self):
 		self._reader.load()

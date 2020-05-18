@@ -288,6 +288,14 @@ class HeFengWeather(WeatherEntity):
                     'day': f.skycon_day.condition,
                     'night': f.skycon_day.condition,
                     })
+        alerts = []
+        if caiyun.alerts:
+            for a in caiyun.alerts:
+                alerts.append({
+                    'states': a.states,
+                    'title': a.title,
+                    'description':a.description
+                    })
         self._attributes = {
             'update_time':hefeng._now_reader.originalJson['update']['loc'],
             'description':caiyun.forecast_keypoint,
@@ -298,11 +306,12 @@ class HeFengWeather(WeatherEntity):
                 'condition': caiyun.realtime.skycon.condition,
                 'humidity': caiyun.realtime.humidity * 100,
                 'aqi': caiyun.realtime.aqi.aqi,
+                'quality': caiyun.realtime.aqi.quality,
                 'pm25': caiyun.realtime.aqi.pm25,
                 'pm10': caiyun.realtime.aqi.pm10,
                 'wind_direction': caiyun.realtime.wind_direction_description,
                 'wind_degree': caiyun.realtime.wind_direction,
-                'wind_speed': caiyun.realtime.wind_speed,
+                'wind_level': caiyun.realtime.wind_level,
                 'pressure': caiyun.realtime.pressure / 100,
                 'index': caiyun.realtime.life_comfort_index,
                 'comfort': caiyun.realtime.life_comfort_desc,                
@@ -310,7 +319,8 @@ class HeFengWeather(WeatherEntity):
                 'area': hefeng.now.area
             },
             'hourlys': hourlys,
-            'dailys': dailys
+            'dailys': dailys,
+            'alerts': alerts
         }            
 
     @asyncio.coroutine

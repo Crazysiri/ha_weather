@@ -249,7 +249,7 @@ class Forecast():
 
 	@property
 	def wind_direction(self):
-		""" 风向 """
+		""" 风向 ws"""
 		return self._wind_direction
 
 	@property
