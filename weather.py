@@ -292,7 +292,7 @@ class HeFengWeather(WeatherEntity):
         if caiyun.alerts:
             for a in caiyun.alerts:
                 alerts.append({
-                    'states': a.states,
+                    'status': a.status,
                     'title': a.title,
                     'description':a.description
                     })
