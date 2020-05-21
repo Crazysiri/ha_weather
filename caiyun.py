@@ -719,6 +719,7 @@ class CaiyunWeather():
 			self._minutely = Minutely(obj['minutely'])
 			self._hourly = Hourly(obj['hourly'])
 			self._daily = Daily(obj['daily'])
+			self._alerts = []
 			for content in obj['alert']['content']:
 				self._alerts.append(Alert(content))
 
