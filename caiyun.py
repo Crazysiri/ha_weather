@@ -412,6 +412,7 @@ class Forecast():
 	def wind_direction_description(self):
 		if not self._wind_direction_description:
 			direction = self.wind_direction
+			final_direction = '无数据'
 			if direction:
 				if direction > 337.4 or direction < 22.5:
 					final_direction = '北风'
@@ -429,8 +430,6 @@ class Forecast():
 					final_direction = '西风'
 				elif direction > 292.4 and direction < 337.5:
 					final_direction = '西北风'
-				else:
-					final_direction = '无数据'
 			self._wind_direction_description = final_direction
 		return self._wind_direction_description
 
