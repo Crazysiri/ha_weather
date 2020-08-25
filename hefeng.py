@@ -473,22 +473,27 @@ class HeFengWeather():
 
 	def parse(self):
 		if self._air_reader.originalJson:
-			obj = self._air_reader.originalJson['air_now_city']
-			self._aqi = Aqi(obj)
+			if 'air_now_city' in self._air_reader.originalJson:			
+				obj = self._air_reader.originalJson['air_now_city']
+				self._aqi = Aqi(obj)
 		if self._forecast_reader.originalJson:
 			self._daily = []
-			for item in self._forecast_reader.originalJson['daily_forecast']:
-				self._daily.append(Forecast(item,True))
+			if 'daily_forecast' in self._forecast_reader.originalJson['daily_forecast']:				
+				for item in self._forecast_reader.originalJson['daily_forecast']:
+					self._daily.append(Forecast(item,True))
 		if self._hourly_reader.originalJson:
 			self._hourly = []
-			for item in self._hourly_reader.originalJson['hourly']:
-				self._hourly.append(Forecast(item,False))	
+			if 'hourly' in self._hourly_reader.originalJson:				
+				for item in self._hourly_reader.originalJson['hourly']:
+					self._hourly.append(Forecast(item,False))	
 		if self._lifestyle_reader.originalJson:
 			self._suggestions = []
-			for item in self._lifestyle_reader.originalJson['lifestyle']:
-				self._suggestions.append(Suggestion(item))
+			if 'lifestyle' in self._lifestyle_reader.originalJson:
+				for item in self._lifestyle_reader.originalJson['lifestyle']:
+					self._suggestions.append(Suggestion(item))
 		if self._now_reader.originalJson:
-			self._now = Forecast(self._now_reader.originalJson['now'],False)
+			if 'now' in self._now_reader.originalJson:
+				self._now = Forecast(self._now_reader.originalJson['now'],False)
 			self._now.city = self._now_reader.originalJson['basic']['parent_city']
 			self._now.area = self._now_reader.originalJson['basic']['location']
 
