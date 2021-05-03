@@ -494,8 +494,9 @@ class HeFengWeather():
 		if self._now_reader.originalJson:
 			if 'now' in self._now_reader.originalJson:
 				self._now = Forecast(self._now_reader.originalJson['now'],False)
-			self._now.city = self._now_reader.originalJson['basic']['parent_city']
-			self._now.area = self._now_reader.originalJson['basic']['location']
+			if 'basic' in self._now_reader.originalJson:
+				self._now.city = self._now_reader.originalJson['basic']['parent_city']
+				self._now.area = self._now_reader.originalJson['basic']['location']
 
 # print(obj.hourly[0].temperature)
 # obj.load()
