@@ -1,6 +1,7 @@
 {
   "domain": "ha_weather",
   "name": "he feng and caiyun",
+  "version": 1.0,
   "documentation": "https://github.com/Crazysiri/ha_weather.git",
   "requirements": [],
   "dependencies": [],
