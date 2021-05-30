@@ -4,6 +4,8 @@
 import logging
 from datetime import datetime, timedelta
 
+from functools import partial
+
 import asyncio
 from homeassistant.helpers.event import async_track_time_interval
 
@@ -178,7 +180,7 @@ class HeFengWeather(WeatherEntity):
         self._object_id = object_id
         self._data = data
         
-        data.reload()
+        hass.async_add_executor_job(data.reload)
         _LOGGER.debug('__init__')
 
     @property
@@ -241,9 +243,12 @@ class HeFengWeather(WeatherEntity):
         """设置其它一些属性值."""
         return self._attributes
 
-    def reload(self,api_type='111111'):
+    def reload_async(self,api_type='111111'):
         self._data.reload(api_type)
         self.setAttributes()
+
+    def reload(self,api_type='111111'):
+        self._hass.async_add_executor_job(partial(self.reload_async,api_type))
 
     def setAttributes(self):
         if not self._data.is_load:
