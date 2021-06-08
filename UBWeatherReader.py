@@ -27,6 +27,8 @@ class WeatherReader():
 
 		self._originalJson = None
 
+		self._session = requests.session()
+		self._session.keep_alive = False
 
 	def setURL(self,url,params):
 		self._url = url
@@ -40,7 +42,7 @@ class WeatherReader():
 
 	def load(self):
 		print(self._url+self._params)
-		req = requests.get(self._url + self._params)
+		req = self._session.get(self._url + self._params)
 		if req.status_code != 200:
 			print('request error')
 			pass
